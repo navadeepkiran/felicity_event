@@ -106,8 +106,6 @@ router.post('/create', async (req, res) => {
 router.post('/join/:inviteCode', async (req, res) => {
   try {
     const { inviteCode } = req.params;
-    console.log('Join team request - invite code:', inviteCode);
-    console.log('User:', req.user?._id, req.user?.email);
 
     // Find team by invite code
     const team = await Team.findOne({ inviteCode }).populate('event');
@@ -294,8 +292,7 @@ async function registerCompleteTeam(team) {
       });
 
       if (existingRegistration) {
-        console.log(`Registration already exists for user ${member.user}`);
-        continue; // Skip this member
+        continue; // Skip this member - already registered
       }
 
       const ticketId = `TKT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`.toUpperCase();

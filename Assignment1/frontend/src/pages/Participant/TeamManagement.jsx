@@ -28,7 +28,6 @@ const TeamManagement = () => {
 
       setEvent(eventRes.data.event);
       setTeam(teamRes.data.team);
-      console.log('Team data loaded:', teamRes.data.team);
     } catch (error) {
       console.error('Fetch error:', error);
       toast.error('Failed to load event details');

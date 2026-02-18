@@ -3,10 +3,10 @@
 ## Production URLs
 
 ### Frontend URL
-https://your-frontend-app.vercel.app
+https://felicity-event-pwoclb0we-nanis-projects-21325ae3.vercel.app
 
 ### Backend API URL
-https://your-backend-app.onrender.com
+https://felicity-event.onrender.com
 
 ## Deployment Details
 
@@ -65,7 +65,7 @@ Expected response: {"status":"ok","message":"Server is running"}
 
 ## Deployment Date
 
-[Insert Date Here]
+February 19, 2026
 
 ## Version
 

@@ -98,12 +98,16 @@ export const sendTicketEmail = async (recipientEmail, registration, event) => {
       html: emailHtml
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`Ticket email sent to ${recipientEmail}`);
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`✅ Ticket email sent to ${recipientEmail}`, result.messageId);
     
     return true;
   } catch (error) {
-    console.error('Email send error:', error);
+    console.error('❌ Email send error:', error.message || error);
+    if (error.response) {
+      console.error('SMTP Response:', error.response);
+    }
+    // Don't throw - registration should succeed even if email fails
     return false;
   }
 };

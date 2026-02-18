@@ -1,0 +1,72 @@
+# Felicity Event Management System - Deployment Links
+
+## Production URLs
+
+### Frontend URL
+https://your-frontend-app.vercel.app
+
+### Backend API URL
+https://your-backend-app.onrender.com
+
+## Deployment Details
+
+### Frontend Hosting
+Provider: Vercel / Netlify
+Build Command: npm run build
+Output Directory: dist
+
+### Backend Hosting
+Provider: Render / Railway / Heroku
+Build Command: npm install
+Start Command: npm start
+Port: Environment Variable
+
+### Database
+Provider: MongoDB Atlas
+Connection: Via MONGODB_URI environment variable
+
+## Environment Variables (Backend)
+
+Required environment variables set in hosting platform:
+- PORT
+- NODE_ENV=production
+- MONGODB_URI
+- JWT_SECRET
+- ADMIN_EMAIL
+- ADMIN_PASSWORD
+- EMAIL_HOST
+- EMAIL_PORT
+- EMAIL_USER
+- EMAIL_PASSWORD
+- FRONTEND_URL
+
+## Admin Credentials
+
+Email: admin@felicity.com
+Password: admin123
+
+Note: Change admin password after first login in production.
+
+## Testing the Deployment
+
+1. Visit frontend URL
+2. Register as a participant with test email
+3. Login and browse events
+4. Admin login: Use admin credentials above
+5. Create test organizer account as admin
+6. Login as organizer and create test event
+7. Register for event as participant
+8. Verify email delivery
+
+## Health Check
+
+Backend health endpoint: https://your-backend-app.onrender.com/api/health
+Expected response: {"status":"ok","message":"Server is running"}
+
+## Deployment Date
+
+[Insert Date Here]
+
+## Version
+
+v1.0.0

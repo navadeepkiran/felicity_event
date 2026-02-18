@@ -28,14 +28,15 @@ const Login = () => {
     e.preventDefault();
     setErrorMessage('');
     
-    if (!captchaToken) {
-      setErrorMessage('Please complete the reCAPTCHA verification');
-      return;
-    }
+    // Skip reCAPTCHA validation for production deployment
+    // if (!captchaToken) {
+    //   setErrorMessage('Please complete the reCAPTCHA verification');
+    //   return;
+    // }
     
     setLoading(true);
 
-    const result = await login(formData.email, formData.password, captchaToken);
+    const result = await login(formData.email, formData.password, captchaToken || 'production-bypass');
 
     if (result.success) {
       toast.success('Login successful!');
@@ -110,6 +111,8 @@ const Login = () => {
             </div>
           )}
 
+          {/* reCAPTCHA disabled for production deployment */}
+          {false && (
           <div className="form-group" style={{ display: 'flex', justifyContent: 'center' }}>
             <ReCAPTCHA
               ref={recaptchaRef}
@@ -117,6 +120,7 @@ const Login = () => {
               onChange={(token) => setCaptchaToken(token)}
             />
           </div>
+          )}
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
             {loading ? 'Logging in...' : 'Login'}

@@ -1,13 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
-import ReCAPTCHA from 'react-google-recaptcha';
 
 const Register = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
-  const recaptchaRef = useRef();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -21,7 +19,6 @@ const Register = () => {
     followedClubs: []
   });
   const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const interestOptions = [
@@ -73,12 +70,6 @@ const Register = () => {
     e.preventDefault();
     setErrorMessage('');
 
-    // Skip reCAPTCHA validation for production deployment
-    // if (!captchaToken) {
-    //   setErrorMessage('Please complete the reCAPTCHA verification');
-    //   return;
-    // }
-
     if (formData.password !== formData.confirmPassword) {
       setErrorMessage('Passwords do not match');
       return;
@@ -109,7 +100,7 @@ const Register = () => {
     }
     
     // Add captcha token
-    registrationData.captchaToken = captchaToken || 'production-bypass';
+    registrationData.captchaToken = 'production-bypass';
     
     const result = await register(registrationData);
 
@@ -122,12 +113,6 @@ const Register = () => {
         errorMsg = result.errors.map(err => err.msg).join(', ');
       }
       setErrorMessage(errorMsg);
-      
-      // Reset captcha on error
-      setCaptchaToken(null);
-      if (recaptchaRef.current) {
-        recaptchaRef.current.reset();
-      }
     }
 
     setLoading(false);
@@ -287,18 +272,6 @@ const Register = () => {
               {errorMessage}
             </div>
           )}
-
-          {/* reCAPTCHA disabled for production deployment */}
-          {false && (
-          <div className="form-group" style={{ display: 'flex', justifyContent: 'center' }}>
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-              onChange={(token) => setCaptchaToken(token)}
-            />
-          </div>
-          )}
-
           <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
             {loading ? 'Creating account...' : 'Register'}
           </button>

@@ -273,27 +273,39 @@ const EventDetails = () => {
               <p><strong>Spots Available:</strong>{event.registrationLimit - event.currentRegistrations}/{event.registrationLimit}</p>
               
               {event.eventType === 'team' && event.teamDetails && (
-                <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#fff3cd', borderRadius: '8px', border: '1px solid #ffc107' }}>
-                  <h4>🏆 Team Event Information</h4>
-                  <p><strong>Team Size:</strong> {event.teamDetails.minTeamSize} - {event.teamDetails.maxTeamSize} members</p>
-                  <p><strong>Registration Type:</strong> Team-based</p>
-                  <p><strong>How it works:</strong> Create or join a team. Registration completes automatically when your team is full.</p>
+                <div style={{ 
+                  marginTop: '20px', 
+                  padding: '15px', 
+                  background: 'linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-elevated) 100%)',
+                  borderRadius: '8px', 
+                  border: '1px solid var(--accent-cyan)'
+                }}>
+                  <h4 style={{ color: 'var(--accent-cyan)' }}>🏆 Team Event Information</h4>
+                  <p style={{ color: 'var(--text-primary)' }}><strong>Team Size:</strong> {event.teamDetails.minTeamSize} - {event.teamDetails.maxTeamSize} members</p>
+                  <p style={{ color: 'var(--text-primary)' }}><strong>Registration Type:</strong> Team-based</p>
+                  <p style={{ color: 'var(--text-primary)' }}><strong>How it works:</strong> Create or join a team. Registration completes automatically when your team is full.</p>
                 </div>
               )}
               
               {event.eventType === 'merchandise' && event.merchandiseDetails && (
-                <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-                  <h4>Merchandise Details</h4>
-                  <p><strong>Item:</strong> {event.merchandiseDetails.itemName}</p>
-                  <p><strong>Stock Available:</strong> {event.merchandiseDetails.stockQuantity}</p>
+                <div style={{ 
+                  marginTop: '20px', 
+                  padding: '15px', 
+                  background: 'linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-elevated) 100%)',
+                  borderRadius: '8px',
+                  border: '1px solid var(--accent-purple)'
+                }}>
+                  <h4 style={{ color: 'var(--accent-purple)' }}>Merchandise Details</h4>
+                  <p style={{ color: 'var(--text-primary)' }}><strong>Item:</strong> {event.merchandiseDetails.itemName}</p>
+                  <p style={{ color: 'var(--text-primary)' }}><strong>Stock Available:</strong> {event.merchandiseDetails.stockQuantity}</p>
                   {event.merchandiseDetails.sizes && event.merchandiseDetails.sizes.length > 0 && (
-                    <p><strong>Available Sizes:</strong> {event.merchandiseDetails.sizes.join(', ')}</p>
+                    <p style={{ color: 'var(--text-primary)' }}><strong>Available Sizes:</strong> {event.merchandiseDetails.sizes.join(', ')}</p>
                   )}
                   {event.merchandiseDetails.colors && event.merchandiseDetails.colors.length > 0 && (
-                    <p><strong>Available Colors:</strong> {event.merchandiseDetails.colors.join(', ')}</p>
+                    <p style={{ color: 'var(--text-primary)' }}><strong>Available Colors:</strong> {event.merchandiseDetails.colors.join(', ')}</p>
                   )}
                   {event.merchandiseDetails.variants && event.merchandiseDetails.variants.length > 0 && (
-                    <p><strong>Variants:</strong> {event.merchandiseDetails.variants.join(', ')}</p>
+                    <p style={{ color: 'var(--text-primary)' }}><strong>Variants:</strong> {event.merchandiseDetails.variants.join(', ')}</p>
                   )}
                 </div>
               )}
@@ -328,38 +340,54 @@ const EventDetails = () => {
         <div className="card" style={{ marginTop: '20px', textAlign: 'center' }}>
           {isRegistered ? (
             <div>
-              <h3 style={{ color: '#27ae60' }}>✓ You are registered for this event!</h3>
-              <p style={{ marginTop: '10px', color: '#7f8c8d' }}>
+              <h3 style={{ color: 'var(--accent-green)' }}>✓ You are registered for this event!</h3>
+              <p style={{ marginTop: '10px', color: 'var(--text-muted)' }}>
                 Check your email for the ticket and QR code.
               </p>
               
               {registration && (
-                <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-                  <h4>Your Ticket</h4>
-                  <p style={{ marginTop: '15px' }}>
-                    <strong>Ticket ID:</strong> {registration.ticketId}
+                <div style={{ 
+                  marginTop: '30px', 
+                  padding: '25px', 
+                  background: 'linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-elevated) 100%)',
+                  borderRadius: '12px',
+                  border: '1px solid var(--event-card-border)',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
+                }}>
+                  <h4 style={{ color: 'var(--accent-cyan)', marginBottom: '15px' }}>🎫 Your Ticket</h4>
+                  <p style={{ marginTop: '15px', fontSize: '1rem' }}>
+                    <strong style={{ color: 'var(--text-primary)' }}>Ticket ID:</strong> 
+                    <span style={{ color: 'var(--accent-cyan)', marginLeft: '10px', fontFamily: 'monospace' }}>
+                      {registration.ticketId}
+                    </span>
                   </p>
-                  <p style={{ marginTop: '10px', color: '#7f8c8d', fontSize: '0.9rem' }}>
+                  <p style={{ marginTop: '10px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                     Registered on: {new Date(registration.registrationDate).toLocaleDateString()}
                   </p>
                   
                   {registration.qrCode && (
-                    <div style={{ marginTop: '20px' }}>
-                      <h5>QR Code:</h5>
-                      <img 
-                        src={registration.qrCode} 
-                        alt="Ticket QR Code" 
-                        style={{ 
-                          maxWidth: '250px', 
-                          margin: '15px auto', 
-                          border: '2px solid #ddd',
-                          borderRadius: '8px',
-                          padding: '10px',
-                          backgroundColor: '#fff'
-                        }} 
-                      />
-                      <p style={{ fontSize: '0.85rem', color: '#7f8c8d', marginTop: '10px' }}>
-                        Show this QR code at the event venue for entry
+                    <div style={{ marginTop: '25px', textAlign: 'center' }}>
+                      <h5 style={{ color: 'var(--text-primary)', marginBottom: '15px' }}>QR Code:</h5>
+                      <div style={{
+                        display: 'inline-block',
+                        padding: '20px',
+                        background: '#ffffff',
+                        borderRadius: '12px',
+                        boxShadow: '0 0 30px rgba(58, 166, 255, 0.3)',
+                        border: '2px solid var(--accent-cyan)'
+                      }}>
+                        <img 
+                          src={registration.qrCode} 
+                          alt="Ticket QR Code" 
+                          style={{ 
+                            width: '250px',
+                            height: '250px',
+                            display: 'block'
+                          }} 
+                        />
+                      </div>
+                      <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '15px', fontStyle: 'italic' }}>
+                        📱 Show this QR code at the event venue for entry
                       </p>
                     </div>
                   )}
@@ -373,6 +401,24 @@ const EventDetails = () => {
                   style={{ marginTop: '20px', fontSize: '1.1rem' }}
                 >
                   🏆 Manage Team
+                </button>
+              )}
+              
+              {/* Feedback Button - Show if attended (even before event ends for testing) */}
+              {(new Date(event.eventEndDate) < new Date() || registration?.status === 'attended') && (
+                <button
+                  onClick={() => navigate(`/events/${eventId}/feedback`)}
+                  className="btn"
+                  style={{ 
+                    marginTop: '20px', 
+                    fontSize: '1.1rem',
+                    background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))',
+                    border: 'none',
+                    color: 'white',
+                    fontWeight: '600'
+                  }}
+                >
+                  📝 Submit Feedback
                 </button>
               )}
             </div>

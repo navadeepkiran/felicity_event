@@ -27,7 +27,7 @@ router.get('/dashboard', async (req, res) => {
 
     const completed = registrations.filter(reg => 
       reg.event && 
-      reg.event.eventEndDate < new Date()
+      (reg.event.eventEndDate < new Date() || reg.status === 'attended')
     );
 
     const cancelled = registrations.filter(reg => 

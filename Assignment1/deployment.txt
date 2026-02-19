@@ -3,7 +3,7 @@
 ## Production URLs
 
 ### Frontend URL
-https://felicity-event-pwoclb0we-nanis-projects-21325ae3.vercel.app
+https://felicity-event.vercel.app
 
 ### Backend API URL
 https://felicity-event.onrender.com
@@ -49,19 +49,29 @@ Note: Change admin password after first login in production.
 
 ## Testing the Deployment
 
-1. Visit frontend URL
-2. Register as a participant with test email
-3. Login and browse events
-4. Admin login: Use admin credentials above
-5. Create test organizer account as admin
-6. Login as organizer and create test event
-7. Register for event as participant
-8. Verify email delivery
+1. ✅ Visit frontend URL - Working
+2. ✅ Register as a participant - Working
+3. ✅ Login and browse events - Working
+4. ✅ Admin login with admin credentials - Working
+5. ✅ Event registration and QR code generation - Working
+6. ✅ QR codes accessible in user dashboard - Working
+7. ✅ Team features and chat - Working
+8. ✅ Password reset functionality - Working
+
+**Note:** Email delivery requires transactional email service (SendGrid/Mailgun) for production. Gmail SMTP is blocked by hosting providers. QR codes are accessible directly in user dashboard after registration.
 
 ## Health Check
 
-Backend health endpoint: https://your-backend-app.onrender.com/api/health
+Backend health endpoint: https://felicity-event.onrender.com/api/health
 Expected response: {"status":"ok","message":"Server is running"}
+
+## Known Limitations
+
+- **Email Delivery:** Gmail SMTP experiences connection timeouts from Render servers. For production email delivery, integrate SendGrid or Mailgun. Users can access QR codes directly from their dashboard.
+- **Free Tier Limitations:** 
+  - Render backend may spin down after 15 minutes of inactivity (30s cold start)
+  - MongoDB Atlas limited to 512MB storage
+  - Vercel bandwidth limits apply
 
 ## Deployment Date
 

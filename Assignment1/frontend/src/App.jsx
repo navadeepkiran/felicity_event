@@ -18,6 +18,7 @@ import TeamChat from './pages/Participant/TeamChat';
 import ParticipantProfile from './pages/Participant/Profile';
 import ClubsList from './pages/Participant/ClubsList';
 import ClubDetails from './pages/Participant/ClubDetails';
+import SubmitFeedback from './pages/Participant/SubmitFeedback';
 
 // Organizer pages
 import OrganizerDashboard from './pages/Organizer/Dashboard';
@@ -26,6 +27,7 @@ import OrganizerEventDetails from './pages/Organizer/EventDetails';
 import AttendanceScanner from './pages/Organizer/AttendanceScanner';
 import PasswordResetRequest from './pages/Organizer/PasswordResetRequest';
 import OrganizerProfile from './pages/Organizer/Profile';
+import EventFeedback from './pages/Organizer/EventFeedback';
 
 // Admin pages
 import AdminDashboard from './pages/Admin/Dashboard';
@@ -122,6 +124,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/events/:eventId/feedback"
+        element={
+          <ProtectedRoute allowedRoles={['participant']}>
+            <SubmitFeedback />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/clubs"
         element={
           <ProtectedRoute allowedRoles={['participant']}>
@@ -176,6 +186,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['organizer']}>
             <AttendanceScanner />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/organizer/events/:eventId/feedback"
+        element={
+          <ProtectedRoute allowedRoles={['organizer']}>
+            <EventFeedback />
           </ProtectedRoute>
         }
       />

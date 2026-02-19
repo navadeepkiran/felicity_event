@@ -32,6 +32,68 @@ const CreateEvent = () => {
     }
   });
   const [loading, setLoading] = useState(false);
+  const [newField, setNewField] = useState({
+    fieldName: '',
+    fieldType: 'text',
+    label: '',
+    required: false,
+    options: ''
+  });
+
+  const addFormField = () => {
+    if (!newField.fieldName || !newField.label) {
+      toast.error('Field name and label are required');
+      return;
+    }
+
+    const field = {
+      fieldName: newField.fieldName,
+      fieldType: newField.fieldType,
+      label: newField.label,
+      required: newField.required,
+      order: formData.customForm.length
+    };
+
+    if (newField.fieldType === 'dropdown' && newField.options) {
+      field.options = newField.options.split(',').map(opt => opt.trim()).filter(Boolean);
+    }
+
+    setFormData({
+      ...formData,
+      customForm: [...formData.customForm, field]
+    });
+
+    setNewField({
+      fieldName: '',
+      fieldType: 'text',
+      label: '',
+      required: false,
+      options: ''
+    });
+  };
+
+  const removeFormField = (index) => {
+    setFormData({
+      ...formData,
+      customForm: formData.customForm.filter((_, i) => i !== index)
+    });
+  };
+
+  const moveFieldUp = (index) => {
+    if (index === 0) return;
+    const newCustomForm = [...formData.customForm];
+    [newCustomForm[index - 1], newCustomForm[index]] = [newCustomForm[index], newCustomForm[index - 1]];
+    newCustomForm.forEach((field, i) => field.order = i);
+    setFormData({ ...formData, customForm: newCustomForm });
+  };
+
+  const moveFieldDown = (index) => {
+    if (index === formData.customForm.length - 1) return;
+    const newCustomForm = [...formData.customForm];
+    [newCustomForm[index + 1], newCustomForm[index]] = [newCustomForm[index], newCustomForm[index + 1]];
+    newCustomForm.forEach((field, i) => field.order = i);
+    setFormData({ ...formData, customForm: newCustomForm });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -163,6 +225,119 @@ const CreateEvent = () => {
                 placeholder="workshop, tech, hackathon" />
             </div>
           </div>
+
+          {/* Custom Registration Form Builder - Only for Normal Events */}
+          {formData.eventType === 'normal' && (
+            <div style={{ marginTop: '30px', padding: '20px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--event-card-border)' }}>
+              <h3 style={{ marginBottom: '20px', color: 'var(--accent-cyan)' }}>📝 Custom Registration Form Builder</h3>
+              
+              {formData.customForm.length > 0 && (
+                <div style={{ marginBottom: '20px' }}>
+                  <h4 style={{ color: 'var(--text-primary)' }}>Current Form Fields:</h4>
+                  {formData.customForm.map((field, index) => (
+                    <div key={index} style={{ 
+                      backgroundColor: 'var(--bg-elevated)', 
+                      padding: '15px', 
+                      marginBottom: '10px', 
+                      borderRadius: '5px',
+                      border: '1px solid var(--border-color)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div>
+                        <strong style={{ color: 'var(--accent-cyan)' }}>{field.label}</strong> 
+                        <span style={{ marginLeft: '10px', color: 'var(--text-muted)' }}>
+                          ({field.fieldType}) 
+                          {field.required && <span style={{ color: '#e74c3c' }}> *Required</span>}
+                        </span>
+                        {field.options && (
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '5px' }}>
+                            Options: {field.options.join(', ')}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', gap: '5px' }}>
+                        <button type="button" onClick={() => moveFieldUp(index)} 
+                          className="btn btn-secondary" style={{ padding: '5px 10px', fontSize: '0.9rem' }}
+                          disabled={index === 0}>
+                          ↑
+                        </button>
+                        <button type="button" onClick={() => moveFieldDown(index)} 
+                          className="btn btn-secondary" style={{ padding: '5px 10px', fontSize: '0.9rem' }}
+                          disabled={index === formData.customForm.length - 1}>
+                          ↓
+                        </button>
+                        <button type="button" onClick={() => removeFormField(index)} 
+                          className="btn btn-danger" style={{ padding: '5px 10px', fontSize: '0.9rem' }}>
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ backgroundColor: 'var(--bg-elevated)', padding: '20px', borderRadius: '5px', border: '1px solid var(--border-color)' }}>
+                <h4 style={{ color: 'var(--text-primary)' }}>Add New Field:</h4>
+                <div className="grid grid-2">
+                  <div className="form-group">
+                    <label className="form-label">Field Name (internal)</label>
+                    <input className="form-input" placeholder="e.g., tshirtSize"
+                      value={newField.fieldName}
+                      onChange={(e) => setNewField({...newField, fieldName: e.target.value})} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Field Label (displayed)</label>
+                    <input className="form-input" placeholder="e.g., T-Shirt Size"
+                      value={newField.label}
+                      onChange={(e) => setNewField({...newField, label: e.target.value})} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Field Type</label>
+                    <select className="form-input"
+                      value={newField.fieldType}
+                      onChange={(e) => setNewField({...newField, fieldType: e.target.value})}>
+                      <option value="text">Text</option>
+                      <option value="email">Email</option>
+                      <option value="number">Number</option>
+                      <option value="textarea">Textarea</option>
+                      <option value="dropdown">Dropdown</option>
+                      <option value="checkbox">Checkbox</option>
+                      <option value="file">File Upload</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                      <input type="checkbox"
+                        checked={newField.required}
+                        onChange={(e) => setNewField({...newField, required: e.target.checked})} />
+                      <span>Required Field</span>
+                    </label>
+                  </div>
+                </div>
+
+                {newField.fieldType === 'dropdown' && (
+                  <div className="form-group">
+                    <label className="form-label">Dropdown Options (comma separated)</label>
+                    <input className="form-input" placeholder="S, M, L, XL, XXL"
+                      value={newField.options}
+                      onChange={(e) => setNewField({...newField, options: e.target.value})} />
+                  </div>
+                )}
+
+                <button type="button" onClick={addFormField} 
+                  className="btn btn-primary" style={{ marginTop: '10px' }}>
+                  + Add Field
+                </button>
+              </div>
+              
+              <p style={{ marginTop: '15px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                💡 <strong>Note:</strong> The form will be locked after the first registration is received. 
+                Participants will fill this form when registering for your event.
+              </p>
+            </div>
+          )}
 
           {/* Team-specific fields */}
           {formData.eventType === 'team' && (

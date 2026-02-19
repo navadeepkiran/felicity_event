@@ -267,9 +267,16 @@ const AttendanceScanner = () => {
                   />
                 </label>
               </div>
-              <div style={{ marginTop: '15px', padding: '15px', backgroundColor: '#e8f4f8', borderRadius: '5px', fontSize: '0.9rem' }}>
-                <strong>📝 Scanning Options:</strong>
-                <ul style={{ marginTop: '8px', marginLeft: '20px' }}>
+              <div style={{ 
+                marginTop: '15px', 
+                padding: '15px', 
+                background: 'linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-elevated) 100%)',
+                borderRadius: '8px', 
+                fontSize: '0.9rem',
+                border: '1px solid var(--border-color)'
+              }}>
+                <strong style={{ color: 'var(--accent-cyan)' }}>📝 Scanning Options:</strong>
+                <ul style={{ marginTop: '8px', marginLeft: '20px', color: 'var(--text-primary)' }}>
                   <li><strong>Camera Scanner:</strong> Use your device camera to scan QR codes in real-time</li>
                   <li><strong>Upload Image:</strong> Take a screenshot/photo of the QR code from participant's phone and upload it</li>
                   <li><strong>Manual Entry:</strong> Use the "Mark Present" button below if both methods fail</li>

@@ -1,19 +1,16 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
-import ReCAPTCHA from 'react-google-recaptcha';
 
 const Login = () => {
   const navigate = useNavigate();
   const { login, user } = useAuth();
-  const recaptchaRef = useRef();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e) => {
@@ -27,16 +24,9 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
-    
-    // Skip reCAPTCHA validation for production deployment
-    // if (!captchaToken) {
-    //   setErrorMessage('Please complete the reCAPTCHA verification');
-    //   return;
-    // }
-    
     setLoading(true);
 
-    const result = await login(formData.email, formData.password, captchaToken || 'production-bypass');
+    const result = await login(formData.email, formData.password, 'production-bypass');
 
     if (result.success) {
       toast.success('Login successful!');
@@ -51,12 +41,6 @@ const Login = () => {
     } else {
       // Show inline error message
       setErrorMessage(result.message || 'Invalid email or password. Please try again.');
-      
-      // Reset captcha on error
-      setCaptchaToken(null);
-      if (recaptchaRef.current) {
-        recaptchaRef.current.reset();
-      }
     }
 
     setLoading(false);
@@ -109,17 +93,6 @@ const Login = () => {
             }}>
               {errorMessage}
             </div>
-          )}
-
-          {/* reCAPTCHA disabled for production deployment */}
-          {false && (
-          <div className="form-group" style={{ display: 'flex', justifyContent: 'center' }}>
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-              onChange={(token) => setCaptchaToken(token)}
-            />
-          </div>
           )}
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>

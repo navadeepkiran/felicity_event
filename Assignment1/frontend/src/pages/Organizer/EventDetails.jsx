@@ -107,7 +107,29 @@ const OrganizerEventDetails = () => {
             >
               📷 QR Scanner
             </button>
+            <button 
+              onClick={() => navigate(`/organizer/events/${eventId}/feedback`)} 
+              className="btn"
+              style={{
+                background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))',
+                border: 'none',
+                color: 'white'
+              }}
+            >
+              📊 View Feedback
+            </button>
             <button onClick={handleExport} className="btn btn-secondary">Export CSV</button>
+            <button 
+              onClick={() => navigate(`/organizer/events/${eventId}/feedback`)} 
+              className="btn"
+              style={{
+                background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-cyan))',
+                color: 'white',
+                border: 'none'
+              }}
+            >
+              📊 View Feedback
+            </button>
           </div>
         </div>
 

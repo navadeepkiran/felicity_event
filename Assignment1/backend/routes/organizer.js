@@ -409,6 +409,7 @@ router.post('/events/:eventId/attendance/scan', async (req, res) => {
 
     // Mark attendance
     registration.attended = true;
+    registration.status = 'attended';
     registration.attendanceTime = new Date();
     await registration.save();
 

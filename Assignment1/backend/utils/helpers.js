@@ -33,7 +33,10 @@ const getTransporter = () => {
     },
     tls: {
       rejectUnauthorized: false
-    }
+    },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 10000
   });
 };
 
@@ -107,6 +110,8 @@ export const sendTicketEmail = async (recipientEmail, registration, event) => {
     if (error.response) {
       console.error('SMTP Response:', error.response);
     }
+    console.log('ℹ️  Note: QR code is still available in user dashboard even if email fails');
+    console.log('ℹ️  Consider using SendGrid/Mailgun for production email delivery');
     // Don't throw - registration should succeed even if email fails
     return false;
   }

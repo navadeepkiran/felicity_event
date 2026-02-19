@@ -33,23 +33,6 @@ router.post('/register/participant',
         return res.status(400).json({ success: false, errors: errors.array() });
       }
 
-      // Verify reCAPTCHA
-      const { captchaToken } = req.body;
-      if (!captchaToken) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'reCAPTCHA verification is required' 
-        });
-      }
-
-      const isValidCaptcha = await verifyRecaptcha(captchaToken);
-      if (!isValidCaptcha) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'reCAPTCHA verification failed. Please try again.' 
-        });
-      }
-
       const { email, password, firstName, lastName, participantType, collegeName, contactNumber, interests, followedClubs } = req.body;
 
       // IIIT email validation
@@ -120,23 +103,6 @@ router.post('/login',
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ success: false, errors: errors.array() });
-      }
-
-      // Verify reCAPTCHA
-      const { captchaToken } = req.body;
-      if (!captchaToken) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'reCAPTCHA verification is required' 
-        });
-      }
-
-      const isValidCaptcha = await verifyRecaptcha(captchaToken);
-      if (!isValidCaptcha) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'reCAPTCHA verification failed. Please try again.' 
-        });
       }
 
       const { email, password } = req.body;

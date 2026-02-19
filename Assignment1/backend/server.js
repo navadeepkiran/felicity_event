@@ -10,6 +10,7 @@ import eventRoutes from './routes/event.js';
 import discussionRoutes from './routes/discussion.js';
 import teamRoutes from './routes/team.js';
 import chatRoutes from './routes/chat.js';
+import feedbackRoutes from './routes/feedback.js';
 
 // Load environment variables
 dotenv.config();
@@ -36,6 +37,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/discussions', discussionRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -10,7 +10,13 @@ const ParticipantProfile = () => {
   const [profile, setProfile] = useState(null);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
- const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -38,6 +44,39 @@ const ParticipantProfile = () => {
       setEditing(false);
     } catch (error) {
       toast.error('Failed to update profile');
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    
+    // Validation
+    if (passwordData.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters long');
+      return;
+    }
+    
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      await api.post('/participant/change-password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+      toast.success('Password changed successfully');
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to change password');
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -115,6 +154,61 @@ const ParticipantProfile = () => {
                 Save Changes
               </button>
             )}
+          </form>
+        </div>
+
+        {/* Security Settings Section */}
+        <div className="card" style={{ marginTop: '30px' }}>
+          <h2 style={{ marginBottom: '20px' }}>Security Settings</h2>
+          <form onSubmit={handlePasswordChange}>
+            <div className="form-group">
+              <label className="form-label">Current Password</label>
+              <input 
+                type="password"
+                className="form-input"
+                value={passwordData.currentPassword}
+                onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                required
+                placeholder="Enter your current password"
+              />
+            </div>
+            
+            <div className="grid grid-2" style={{ marginTop: '15px' }}>
+              <div className="form-group">
+                <label className="form-label">New Password</label>
+                <input 
+                  type="password"
+                  className="form-input"
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                  required
+                  minLength="6"
+                  placeholder="At least 6 characters"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Confirm New Password</label>
+                <input 
+                  type="password"
+                  className="form-input"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                  required
+                  minLength="6"
+                  placeholder="Re-enter new password"
+                />
+              </div>
+            </div>
+            
+            <button 
+              type="submit" 
+              className="btn btn-primary" 
+              style={{ marginTop: '20px' }}
+              disabled={changingPassword}
+            >
+              {changingPassword ? 'Changing Password...' : 'Change Password'}
+            </button>
           </form>
         </div>
       </div>

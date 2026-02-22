@@ -147,7 +147,7 @@ const TeamChat = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div>
             <h1>💬 Team Chat</h1>
-            <p style={{ color: '#7f8c8d', marginTop: '5px' }}>
+            <p style={{ color: 'var(--text-muted)', marginTop: '5px' }}>
               {team.teamName} • {team.members.length}/{team.teamSize} members
             </p>
           </div>
@@ -163,7 +163,7 @@ const TeamChat = () => {
             flex: 1, 
             overflowY: 'auto', 
             padding: '20px', 
-            backgroundColor: '#f8f9fa',
+            backgroundColor: 'var(--bg-secondary)',
             display: 'flex',
             flexDirection: 'column',
             gap: '15px'
@@ -171,7 +171,7 @@ const TeamChat = () => {
             {messages.length === 0 ? (
               <div style={{ 
                 textAlign: 'center', 
-                color: '#7f8c8d', 
+                color: 'var(--text-muted)', 
                 marginTop: '50px',
                 padding: '40px'
               }}>
@@ -197,7 +197,7 @@ const TeamChat = () => {
                     {showSenderName && (
                       <div style={{ 
                         fontSize: '0.85rem', 
-                        color: '#7f8c8d',
+                        color: 'var(--text-muted)',
                         marginBottom: '5px',
                         marginLeft: isOwnMessage ? '0' : '10px',
                         marginRight: isOwnMessage ? '10px' : '0'
@@ -212,11 +212,12 @@ const TeamChat = () => {
                       gap: '8px'
                     }}>
                       <div style={{
-                        backgroundColor: isOwnMessage ? '#3498db' : '#fff',
-                        color: isOwnMessage ? '#fff' : '#2c3e50',
+                        backgroundColor: isOwnMessage ? '#58a6ff' : 'var(--bg-elevated)',
+                        color: isOwnMessage ? 'var(--text-inverse)' : 'var(--text-primary)',
                         padding: '10px 15px',
                         borderRadius: isOwnMessage ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                        border: isOwnMessage ? 'none' : '1px solid var(--border-default)',
                         wordWrap: 'break-word',
                         position: 'relative'
                       }}>
@@ -264,9 +265,9 @@ const TeamChat = () => {
           <form 
             onSubmit={handleSendMessage}
             style={{ 
-              borderTop: '2px solid #e0e0e0', 
+              borderTop: '2px solid var(--border-default)', 
               padding: '20px',
-              backgroundColor: '#fff'
+              backgroundColor: 'var(--bg-elevated)'
             }}
           >
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
@@ -277,18 +278,12 @@ const TeamChat = () => {
                   placeholder="Type your message..."
                   rows={3}
                   disabled={sending}
+                  className="form-input"
                   style={{
                     width: '100%',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    border: '2px solid #e0e0e0',
-                    fontSize: '1rem',
-                    fontFamily: 'inherit',
                     resize: 'none',
-                    transition: 'border-color 0.2s'
+                    minHeight: '80px'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#3498db'}
-                  onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -298,7 +293,7 @@ const TeamChat = () => {
                 />
                 <div style={{ 
                   fontSize: '0.85rem', 
-                  color: newMessage.length > 2000 ? '#e74c3c' : '#7f8c8d',
+                  color: newMessage.length > 2000 ? '#e74c3c' : 'var(--text-muted)',
                   marginTop: '5px',
                   textAlign: 'right'
                 }}>
@@ -322,7 +317,7 @@ const TeamChat = () => {
             </div>
             <p style={{ 
               fontSize: '0.85rem', 
-              color: '#7f8c8d', 
+              color: 'var(--text-muted)', 
               marginTop: '10px',
               marginBottom: 0
             }}>

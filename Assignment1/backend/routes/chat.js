@@ -23,7 +23,7 @@ router.get('/:teamId/messages', async (req, res) => {
 
     // Verify user is a member of the team
     const isMember = team.teamLeader.toString() === req.user._id.toString() ||
-                     team.members.some(m => m.participant.toString() === req.user._id.toString());
+                     team.members.some(m => m.user.toString() === req.user._id.toString());
 
     if (!isMember) {
       return res.status(403).json({
@@ -79,7 +79,7 @@ router.post('/:teamId/messages', async (req, res) => {
 
     // Verify user is a member of the team
     const isMember = team.teamLeader.toString() === req.user._id.toString() ||
-                     team.members.some(m => m.participant.toString() === req.user._id.toString());
+                     team.members.some(m => m.user.toString() === req.user._id.toString());
 
     if (!isMember) {
       return res.status(403).json({

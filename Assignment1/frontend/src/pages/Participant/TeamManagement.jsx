@@ -129,7 +129,7 @@ const TeamManagement = () => {
 
         <div className="card" style={{ marginBottom: '30px', padding: '30px' }}>
           <h1 style={{ marginBottom: '10px' }}>{event.eventName}</h1>
-          <p style={{ color: '#7f8c8d', fontSize: '1.1rem' }}>Team Registration</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Team Registration</p>
           
           {event.teamDetails && (
             <div style={{ marginTop: '20px', padding: '15px', backgroundColor: 'rgba(88, 166, 255, 0.15)', borderRadius: '8px', border: '1px solid #58a6ff' }}>
@@ -183,7 +183,7 @@ const TeamManagement = () => {
 
             <div className="card" style={{ padding: '30px', textAlign: 'center' }}>
               <h2 style={{ marginBottom: '20px' }}>Join an Existing Team</h2>
-              <p style={{ color: '#7f8c8d', marginBottom: '20px' }}>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>
                 Have an invite code? Join your friend's team!
               </p>
               

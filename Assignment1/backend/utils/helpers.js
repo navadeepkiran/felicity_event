@@ -38,11 +38,15 @@ const getTransporter = () => {
         pass: process.env.BREVO_PASSWORD || process.env.EMAIL_PASSWORD
       },
       tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        ciphers: 'SSLv3'
       },
-      connectionTimeout: 20000,
-      greetingTimeout: 20000,
-      socketTimeout: 20000
+      connectionTimeout: 60000, // Increased to 60 seconds for Render
+      greetingTimeout: 60000,
+      socketTimeout: 60000,
+      pool: true, // Use connection pooling
+      maxConnections: 5,
+      maxMessages: 100
     });
   } else {
     // Gmail SMTP - Works for local development only

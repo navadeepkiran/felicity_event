@@ -533,8 +533,9 @@ body {
 }
 
 .Toastify__toast--success {
-  background: linear-gradient(135deg, rgba(63, 185, 80, 0.95) 0%, rgba(46, 160, 67, 0.95) 100%) !important;
-  box-shadow: 0 8px 32px var(--accent-green-glow) !important;
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%) !important;
+  color: white !important;
+  box-shadow: 0 8px 32px rgba(74, 222, 128, 0.5) !important;
 }
 
 .Toastify__toast--info {

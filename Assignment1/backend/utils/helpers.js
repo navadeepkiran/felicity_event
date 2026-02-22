@@ -23,21 +23,46 @@ export const generateQRCode = async (data) => {
 
 // Email transporter configuration
 const getTransporter = () => {
-  return createTransport({
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT) || 587,
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD
-    },
-    tls: {
-      rejectUnauthorized: false
-    },
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000,
-    socketTimeout: 10000
-  });
+  // Support both Brevo (production) and Gmail (development)
+  const emailService = process.env.EMAIL_SERVICE || 'brevo';
+  
+  if (emailService === 'brevo') {
+    // Brevo/Sendinblue SMTP - Best for production (300 emails/day free)
+    // Works reliably on deployed servers (Render, Vercel, etc.)
+    return createTransport({
+      host: 'smtp-relay.brevo.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.BREVO_USER || process.env.EMAIL_USER,
+        pass: process.env.BREVO_PASSWORD || process.env.EMAIL_PASSWORD
+      },
+      tls: {
+        rejectUnauthorized: false
+      },
+      connectionTimeout: 20000,
+      greetingTimeout: 20000,
+      socketTimeout: 20000
+    });
+  } else {
+    // Gmail SMTP - Works for local development only
+    return createTransport({
+      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+      },
+      tls: {
+        rejectUnauthorized: false
+      },
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 15000
+    });
+  }
 };
 
 // Send ticket email

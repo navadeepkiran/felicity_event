@@ -17,7 +17,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sendinblue/client": "^3.3.1",
     "axios": "^1.13.5",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -29,8 +28,7 @@
     "multer": "^1.4.5-lts.1",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.7",
-    "qrcode": "^1.5.3",
-    "sib-api-v3-sdk": "^8.5.0"
+    "qrcode": "^1.5.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

@@ -1,6 +1,7 @@
 import QRCode from 'qrcode';
 import pkg from 'nodemailer';
 const { createTransport } = pkg;
+import axios from 'axios';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -69,11 +70,11 @@ const getTransporter = () => {
   }
 };
 
-// Send ticket email
+// Send ticket email using Brevo API (works on Render - no SMTP blocking)
 export const sendTicketEmail = async (recipientEmail, registration, event) => {
   try {
-    const transporter = getTransporter();
-
+    const emailService = process.env.EMAIL_SERVICE || 'brevo';
+    
     const emailHtml = `
       <!DOCTYPE html>
       <html>
@@ -123,25 +124,50 @@ export const sendTicketEmail = async (recipientEmail, registration, event) => {
       </html>
     `;
 
-    const mailOptions = {
-      from: `"Felicity Events" <${process.env.EMAIL_USER}>`,
-      to: recipientEmail,
-      subject: `Registration Confirmed - ${event.eventName}`,
-      html: emailHtml
-    };
+    if (emailService === 'brevo') {
+      // Use Brevo REST API (works on Render - uses HTTPS, not blocked)
+      const apiKey = process.env.BREVO_API_KEY || process.env.BREVO_PASSWORD;
+      const senderEmail = process.env.BREVO_USER || process.env.EMAIL_USER;
+      
+      const response = await axios.post(
+        'https://api.brevo.com/v3/smtp/email',
+        {
+          sender: { email: senderEmail, name: 'Felicity Events' },
+          to: [{ email: recipientEmail }],
+          subject: `Registration Confirmed - ${event.eventName}`,
+          htmlContent: emailHtml
+        },
+        {
+          headers: {
+            'api-key': apiKey,
+            'Content-Type': 'application/json'
+          },
+          timeout: 30000
+        }
+      );
+      
+      console.log(`✅ Ticket email sent via Brevo API to ${recipientEmail}`, response.data.messageId);
+      return true;
+      
+    } else {
+      // Fallback to Gmail SMTP for local development
+      const transporter = getTransporter();
+      
+      const mailOptions = {
+        from: `"Felicity Events" <${process.env.EMAIL_USER}>`,
+        to: recipientEmail,
+        subject: `Registration Confirmed - ${event.eventName}`,
+        html: emailHtml
+      };
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`✅ Ticket email sent to ${recipientEmail}`, result.messageId);
-    
-    return true;
-  } catch (error) {
-    console.error('❌ Email send error:', error.message || error);
-    if (error.response) {
-      console.error('SMTP Response:', error.response);
+      const result = await transporter.sendMail(mailOptions);
+      console.log(`✅ Ticket email sent to ${recipientEmail}`, result.messageId);
+      return true;
     }
+    
+  } catch (error) {
+    console.error('❌ Email send error:', error.response?.data || error.message || error);
     console.log('ℹ️  Note: QR code is still available in user dashboard even if email fails');
-    console.log('ℹ️  Consider using SendGrid/Mailgun for production email delivery');
-    // Don't throw - registration should succeed even if email fails
     return false;
   }
 };

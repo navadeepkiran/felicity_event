@@ -341,8 +341,8 @@ const CreateEvent = () => {
 
           {/* Team-specific fields */}
           {formData.eventType === 'team' && (
-            <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#fff3cd', borderRadius: '8px', border: '2px solid #ffc107' }}>
-              <h3 style={{ marginBottom: '20px' }}>🏆 Team Event Configuration</h3>
+            <div style={{ marginTop: '30px', padding: '20px', backgroundColor: 'rgba(255, 193, 7, 0.15)', borderRadius: '8px', border: '2px solid #ffc107' }}>
+              <h3 style={{ marginBottom: '20px', color: '#ffc107' }}>🏆 Team Event Configuration</h3>
               
               <div className="grid grid-2">
                 <div className="form-group">
@@ -380,7 +380,7 @@ const CreateEvent = () => {
                 </label>
               </div>
 
-              <p style={{ marginTop: '15px', fontSize: '0.9rem', color: '#856404' }}>
+              <p style={{ marginTop: '15px', fontSize: '0.9rem', color: '#ffc107' }}>
                 💡 Participants will be able to create teams and invite others using invite codes. Registration completes automatically when the team is full.
               </p>
             </div>

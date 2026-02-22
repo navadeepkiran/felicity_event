@@ -132,9 +132,9 @@ const TeamManagement = () => {
           <p style={{ color: '#7f8c8d', fontSize: '1.1rem' }}>Team Registration</p>
           
           {event.teamDetails && (
-            <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#e8f4f8', borderRadius: '5px' }}>
-              <strong>Team Requirements:</strong>
-              <ul style={{ marginTop: '10px', marginLeft: '20px' }}>
+            <div style={{ marginTop: '20px', padding: '15px', backgroundColor: 'rgba(88, 166, 255, 0.15)', borderRadius: '8px', border: '1px solid #58a6ff' }}>
+              <strong style={{ color: '#58a6ff' }}>Team Requirements:</strong>
+              <ul style={{ marginTop: '10px', marginLeft: '20px', color: 'var(--text-primary)' }}>
                 <li>Team size: {event.teamDetails.minTeamSize} - {event.teamDetails.maxTeamSize} members</li>
                 <li>Registration fee per person: ₹{event.registrationFee}</li>
                 <li>Registration closes: {new Date(event.registrationDeadline).toLocaleString()}</li>
@@ -238,8 +238,9 @@ const TeamManagement = () => {
                   padding: '5px 15px', 
                   borderRadius: '20px', 
                   fontSize: '0.9rem',
-                  backgroundColor: team.status === 'registered' ? '#d4edda' : team.status === 'complete' ? '#cce5ff' : '#fff3cd',
-                  color: team.status === 'registered' ? '#155724' : team.status === 'complete' ? '#004085' : '#856404'
+                  backgroundColor: team.status === 'registered' ? 'rgba(34, 197, 94, 0.2)' : team.status === 'complete' ? 'rgba(88, 166, 255, 0.2)' : 'rgba(255, 193, 7, 0.2)',
+                  color: team.status === 'registered' ? '#22c55e' : team.status === 'complete' ? '#58a6ff' : '#ffc107',
+                  border: `1px solid ${team.status === 'registered' ? '#22c55e' : team.status === 'complete' ? '#58a6ff' : '#ffc107'}`
                 }}>
                   {team.status === 'registered' ? '✓ Registered' : team.status === 'complete' ? '✓ Team Complete' : '⏳ Incomplete'}
                 </span>
@@ -259,25 +260,25 @@ const TeamManagement = () => {
             </div>
 
             {team.status === 'incomplete' && (
-              <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#fff3cd', borderRadius: '5px', border: '1px solid #ffc107' }}>
-                <strong>⚠️ Team Incomplete</strong>
-                <p style={{ marginTop: '10px', marginBottom: '15px' }}>
+              <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: 'rgba(255, 193, 7, 0.15)', borderRadius: '8px', border: '1px solid #ffc107' }}>
+                <strong style={{ color: '#ffc107' }}>⚠️ Team Incomplete</strong>
+                <p style={{ marginTop: '10px', marginBottom: '15px', color: 'var(--text-primary)' }}>
                   Share the invite code below with your teammates. Registration will be completed automatically when all members join.
                 </p>
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                   <div style={{ flex: 1, minWidth: '200px' }}>
-                    <label className="form-label" style={{ marginBottom: '5px' }}>Invite Code:</label>
+                    <label className="form-label" style={{ marginBottom: '5px', color: 'var(--text-primary)' }}>Invite Code:</label>
                     <div style={{ 
                       padding: '15px', 
-                      backgroundColor: 'white', 
-                      borderRadius: '5px', 
-                      border: '2px dashed #3498db',
+                      backgroundColor: 'rgba(88, 166, 255, 0.1)', 
+                      borderRadius: '8px', 
+                      border: '2px dashed #58a6ff',
                       fontSize: '1.5rem',
                       fontWeight: 'bold',
                       textAlign: 'center',
                       letterSpacing: '3px',
-                      color: '#3498db'
+                      color: '#58a6ff'
                     }}>
                       {team.inviteCode}
                     </div>
@@ -296,18 +297,18 @@ const TeamManagement = () => {
             )}
 
             {team.status === 'complete' && !team.registrationId && (
-              <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#cce5ff', borderRadius: '5px', border: '1px solid #007bff' }}>
-                <strong>🎉 Team Complete!</strong>
-                <p style={{ marginTop: '10px' }}>
+              <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: 'rgba(88, 166, 255, 0.15)', borderRadius: '8px', border: '1px solid #58a6ff' }}>
+                <strong style={{ color: '#58a6ff' }}>🎉 Team Complete!</strong>
+                <p style={{ marginTop: '10px', color: 'var(--text-primary)' }}>
                   Registration is being processed. You will receive your tickets via email shortly.
                 </p>
               </div>
             )}
 
             {team.status === 'registered' && (
-              <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#d4edda', borderRadius: '5px', border: '1px solid #28a745' }}>
-                <strong>✅ Registration Complete!</strong>
-                <p style={{ marginTop: '10px' }}>
+              <div style={{ marginBottom: '30px', padding: '20px', backgroundColor: 'rgba(34, 197, 94, 0.15)', borderRadius: '8px', border: '1px solid #22c55e' }}>
+                <strong style={{ color: '#22c55e' }}>✅ Registration Complete!</strong>
+                <p style={{ marginTop: '10px', color: 'var(--text-primary)' }}>
                   All team members have been sent their tickets via email. Check your participation history for ticket details.
                 </p>
                 <button 
@@ -327,20 +328,21 @@ const TeamManagement = () => {
                   key={index}
                   style={{ 
                     padding: '15px', 
-                    backgroundColor: '#f8f9fa', 
-                    borderRadius: '5px',
+                    backgroundColor: 'var(--bg-elevated)', 
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-default)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
                   }}
                 >
                   <div>
-                    <strong>{member.name}</strong>
-                    {index === 0 && <span style={{ marginLeft: '10px', color: '#3498db', fontSize: '0.9rem' }}>👑 Leader</span>}
+                    <strong style={{ color: 'var(--text-primary)' }}>{member.name}</strong>
+                    {index === 0 && <span style={{ marginLeft: '10px', color: '#58a6ff', fontSize: '0.9rem' }}>👑 Leader</span>}
                     <br />
-                    <small style={{ color: '#7f8c8d' }}>{member.email}</small>
+                    <small style={{ color: 'var(--text-muted)' }}>{member.email}</small>
                   </div>
-                  <small style={{ color: '#95a5a6' }}>
+                  <small style={{ color: 'var(--text-muted)' }}>
                     Joined: {new Date(member.joinedAt).toLocaleDateString()}
                   </small>
                 </div>
@@ -352,11 +354,11 @@ const TeamManagement = () => {
                   key={`empty-${i}`}
                   style={{ 
                     padding: '15px', 
-                    backgroundColor: '#ecf0f1', 
-                    borderRadius: '5px',
-                    border: '2px dashed #bdc3c7',
+                    backgroundColor: 'rgba(127, 140, 141, 0.1)', 
+                    borderRadius: '8px',
+                    border: '2px dashed var(--border-default)',
                     textAlign: 'center',
-                    color: '#95a5a6'
+                    color: 'var(--text-muted)'
                   }}
                 >
                   Waiting for member {team.members.length + i + 1}...

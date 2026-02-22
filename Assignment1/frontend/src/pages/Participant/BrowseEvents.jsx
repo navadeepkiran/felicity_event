@@ -55,7 +55,7 @@ const BrowseEvents = () => {
       <div key={event._id} className="card">
         <h3>{event.eventName}</h3>
         <p style={{ color: '#7f8c8d', margin: '10px 0' }}>
-          By {event.organizer?.organizerName || 'Unknown'}
+          By <Link to={`/clubs/${event.organizer?._id}`} style={{ color: '#58a6ff', textDecoration: 'none', fontWeight: '500' }} onMouseOver={(e) => e.target.style.textDecoration = 'underline'} onMouseOut={(e) => e.target.style.textDecoration = 'none'}>{event.organizer?.organizerName || 'Unknown'}</Link>
         </p>
         <p style={{ fontSize: '0.9rem', color: '#555' }}>
           {event.eventDescription.substring(0, 150)}...

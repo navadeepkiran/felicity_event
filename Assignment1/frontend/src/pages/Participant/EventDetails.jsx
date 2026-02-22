@@ -248,7 +248,7 @@ const EventDetails = () => {
           <div>
             <h1>{event.eventName}</h1>
             <p style={{ color: '#7f8c8d', marginTop: '10px' }}>
-              Organized by {event.organizer?.organizerName || 'Unknown'}
+              Organized by <Link to={`/clubs/${event.organizer?._id}`} style={{ color: '#58a6ff', textDecoration: 'none', fontWeight: '500' }} onMouseOver={(e) => e.target.style.textDecoration = 'underline'} onMouseOut={(e) => e.target.style.textDecoration = 'none'}>{event.organizer?.organizerName || 'Unknown'}</Link>
             </p>
           </div>
           <div>

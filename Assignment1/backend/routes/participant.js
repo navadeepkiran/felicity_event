@@ -153,12 +153,33 @@ router.post('/register/:eventId', async (req, res) => {
       });
     }
 
-    // Check for merchandise stock
-    if (event.eventType === 'merchandise' && event.merchandiseDetails.stockQuantity <= 0) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Item is out of stock' 
-      });
+    // Check for merchandise stock and limits
+    if (event.eventType === 'merchandise') {
+      const orderQuantity = merchandiseOrder?.quantity || 1;
+      
+      // Check if out of stock
+      if (event.merchandiseDetails.stockQuantity <= 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Item is out of stock' 
+        });
+      }
+      
+      // Check if requested quantity exceeds available stock
+      if (orderQuantity > event.merchandiseDetails.stockQuantity) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Only ${event.merchandiseDetails.stockQuantity} items available in stock` 
+        });
+      }
+      
+      // Check purchase limit per user (if set)
+      if (event.merchandiseDetails.purchaseLimit && orderQuantity > event.merchandiseDetails.purchaseLimit) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Purchase limit is ${event.merchandiseDetails.purchaseLimit} items per person` 
+        });
+      }
     }
 
     // Check if already registered

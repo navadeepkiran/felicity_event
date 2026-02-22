@@ -55,19 +55,40 @@ const ClubDetails = () => {
         </div>
 
         <h2 style={{ marginTop: '40px' }}>Upcoming Events</h2>
-        <div className="grid grid-3" style={{ marginTop: '20px' }}>
-          {data.upcomingEvents.map(event => (
-            <div key={event._id} className="card">
-              <h3>{event.eventName}</h3>
-              <p style={{ color: '#7f8c8d', fontSize: '0.9rem' }}>
-                {new Date(event.eventStartDate).toLocaleDateString()}
-              </p>
-              <Link to={`/events/${event._id}`} className="btn btn-primary" style={{ marginTop: '10px' }}>
-                View Event
-              </Link>
-            </div>
-          ))}
-        </div>
+        {data.upcomingEvents.length === 0 ? (
+          <p style={{ color: '#7f8c8d', marginTop: '15px' }}>No upcoming events</p>
+        ) : (
+          <div className="grid grid-3" style={{ marginTop: '20px' }}>
+            {data.upcomingEvents.map(event => (
+              <div key={event._id} className="card">
+                <h3>{event.eventName}</h3>
+                <p style={{ color: '#7f8c8d', fontSize: '0.9rem' }}>
+                  {new Date(event.eventStartDate).toLocaleDateString()}
+                </p>
+                <Link to={`/events/${event._id}`} className="btn btn-primary" style={{ marginTop: '10px' }}>
+                  View Event
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <h2 style={{ marginTop: '40px' }}>Past Events</h2>
+        {data.pastEvents.length === 0 ? (
+          <p style={{ color: '#7f8c8d', marginTop: '15px' }}>No past events</p>
+        ) : (
+          <div className="grid grid-3" style={{ marginTop: '20px' }}>
+            {data.pastEvents.map(event => (
+              <div key={event._id} className="card">
+                <h3>{event.eventName}</h3>
+                <p style={{ color: '#7f8c8d', fontSize: '0.9rem' }}>
+                  {new Date(event.eventStartDate).toLocaleDateString()}
+                </p>
+                <span className="badge badge-secondary" style={{ marginTop: '10px' }}>Completed</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </Layout>
   );

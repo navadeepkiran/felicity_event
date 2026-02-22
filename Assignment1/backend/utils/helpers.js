@@ -75,6 +75,20 @@ export const sendTicketEmail = async (recipientEmail, registration, event) => {
   try {
     const emailService = process.env.EMAIL_SERVICE || 'brevo';
     
+    // Build merchandise details HTML if applicable
+    let merchandiseDetailsHtml = '';
+    if (event.eventType === 'merchandise' && registration.merchandiseOrder) {
+      merchandiseDetailsHtml = `
+        <div class="ticket-info">
+          <h3>Order Details</h3>
+          ${registration.merchandiseOrder.size ? `<p><strong>Size:</strong> ${registration.merchandiseOrder.size}</p>` : ''}
+          ${registration.merchandiseOrder.color ? `<p><strong>Color:</strong> ${registration.merchandiseOrder.color}</p>` : ''}
+          ${registration.merchandiseOrder.variant ? `<p><strong>Variant:</strong> ${registration.merchandiseOrder.variant}</p>` : ''}
+          <p><strong>Quantity:</strong> ${registration.merchandiseOrder.quantity || 1}</p>
+        </div>
+      `;
+    }
+    
     const emailHtml = `
       <!DOCTYPE html>
       <html>
@@ -93,11 +107,11 @@ export const sendTicketEmail = async (recipientEmail, registration, event) => {
       <body>
         <div class="container">
           <div class="header">
-            <h1>🎉 Registration Successful!</h1>
+            <h1>🎉 ${event.eventType === 'merchandise' ? 'Purchase' : 'Registration'} Successful!</h1>
           </div>
           <div class="content">
             <h2>Hello!</h2>
-            <p>Your registration for <strong>${event.eventName}</strong> has been confirmed.</p>
+            <p>Your ${event.eventType === 'merchandise' ? 'purchase' : 'registration'} for <strong>${event.eventName}</strong> has been confirmed.</p>
             
             <div class="ticket-info">
               <h3>Ticket Details</h3>
@@ -107,13 +121,15 @@ export const sendTicketEmail = async (recipientEmail, registration, event) => {
               <p><strong>Amount Paid:</strong> ₹${registration.amountPaid}</p>
             </div>
 
+            ${merchandiseDetailsHtml}
+
             <div class="qr-code">
               <h3>Your QR Code</h3>
-              <p>Please show this QR code at the event venue for entry:</p>
+              <p>Please show this QR code at the event venue for ${event.eventType === 'merchandise' ? 'pickup' : 'entry'}:</p>
               <img src="${registration.qrCode}" alt="QR Code" />
             </div>
 
-            <p><strong>Important:</strong> Please save this email or take a screenshot of the QR code for easy access at the event.</p>
+            <p><strong>Important:</strong> Please save this email or take a screenshot of the QR code for easy access.</p>
           </div>
           <div class="footer">
             <p>This is an automated email. Please do not reply.</p>

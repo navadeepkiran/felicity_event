@@ -84,9 +84,9 @@ const PasswordResetManagement = () => {
 
   const getStatusBadge = (status) => {
     const statusStyles = {
-      pending: { bg: '#fff3cd', color: '#856404', text: '⏳ Pending' },
-      approved: { bg: '#d4edda', color: '#155724', text: '✓ Approved' },
-      rejected: { bg: '#f8d7da', color: '#721c24', text: '✗ Rejected' }
+      pending: { bg: 'rgba(255, 193, 7, 0.2)', color: '#ffc107', border: '#ffc107', text: '⏳ Pending' },
+      approved: { bg: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', border: '#22c55e', text: '✓ Approved' },
+      rejected: { bg: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '#ef4444', text: '✗ Rejected' }
     };
     const style = statusStyles[status] || statusStyles.pending;
     
@@ -96,6 +96,7 @@ const PasswordResetManagement = () => {
         borderRadius: '20px', 
         backgroundColor: style.bg, 
         color: style.color,
+        border: `1px solid ${style.border}`,
         fontSize: '0.9rem'
       }}>
         {style.text}
@@ -123,7 +124,7 @@ const PasswordResetManagement = () => {
           <div>
             <h1>Password Reset Requests</h1>
             {pendingCount > 0 && (
-              <p style={{ color: '#856404', marginTop: '10px' }}>
+              <p style={{ color: '#ffc107', marginTop: '10px' }}>
                 ⚠️ {pendingCount} pending request{pendingCount !== 1 ? 's' : ''} awaiting review
               </p>
             )}
@@ -156,7 +157,7 @@ const PasswordResetManagement = () => {
 
         {requests.length === 0 ? (
           <div className="card" style={{ padding: '50px', textAlign: 'center' }}>
-            <p style={{ color: '#7f8c8d', fontSize: '1.1rem' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
               {filterStatus === 'all' 
                 ? 'No password reset requests yet.'
                 : `No ${filterStatus} requests found.`}
@@ -175,22 +176,22 @@ const PasswordResetManagement = () => {
                     <h3 style={{ marginBottom: '5px' }}>
                       {request.organizer?.organizerName || 'Unknown Organizer'}
                     </h3>
-                    <p style={{ color: '#7f8c8d', fontSize: '0.9rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                       <strong>Email:</strong> {request.organizer?.email}
                     </p>
-                    <p style={{ color: '#7f8c8d', fontSize: '0.9rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                       <strong>Request ID:</strong> #{request._id.slice(-8)}
                     </p>
-                    <p style={{ color: '#7f8c8d', fontSize: '0.9rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                       <strong>Submitted:</strong> {new Date(request.createdAt).toLocaleString()}
                     </p>
                   </div>
                   {getStatusBadge(request.status)}
                 </div>
 
-                <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '5px' }}>
-                  <strong>Reason for Reset:</strong>
-                  <p style={{ marginTop: '10px', color: '#495057', lineHeight: '1.6' }}>
+                <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: 'var(--bg-elevated)', borderRadius: '8px', border: '1px solid var(--border-default)' }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>Reason for Reset:</strong>
+                  <p style={{ marginTop: '10px', color: 'var(--text-primary)', lineHeight: '1.6' }}>
                     {request.reason}
                   </p>
                 </div>
@@ -219,16 +220,17 @@ const PasswordResetManagement = () => {
                 {request.status === 'approved' && (
                   <div style={{ 
                     padding: '15px', 
-                    backgroundColor: '#d4edda', 
-                    borderRadius: '5px',
-                    color: '#155724'
+                    backgroundColor: 'rgba(34, 197, 94, 0.15)', 
+                    borderRadius: '8px',
+                    border: '1px solid #22c55e',
+                    color: '#22c55e'
                   }}>
                     <strong>✓ Approved</strong>
-                    <p style={{ marginTop: '10px' }}>
+                    <p style={{ marginTop: '10px', color: 'var(--text-primary)' }}>
                       New password generated and shared with organizer.
                     </p>
                     {request.reviewedBy && (
-                      <p style={{ marginTop: '10px', fontSize: '0.9rem' }}>
+                      <p style={{ marginTop: '10px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                         <strong>Reviewed by:</strong> {request.reviewedBy.name || request.reviewedBy.email}
                         <br />
                         <strong>Date:</strong> {new Date(request.reviewedAt).toLocaleString()}
@@ -240,18 +242,19 @@ const PasswordResetManagement = () => {
                 {request.status === 'rejected' && (
                   <div style={{ 
                     padding: '15px', 
-                    backgroundColor: '#f8d7da', 
-                    borderRadius: '5px',
-                    color: '#721c24'
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)', 
+                    borderRadius: '8px',
+                    border: '1px solid #ef4444',
+                    color: '#ef4444'
                   }}>
                     <strong>✗ Rejected</strong>
                     {request.adminNotes && (
-                      <p style={{ marginTop: '10px' }}>
+                      <p style={{ marginTop: '10px', color: 'var(--text-primary)' }}>
                         <strong>Rejection Reason:</strong> {request.adminNotes}
                       </p>
                     )}
                     {request.reviewedBy && (
-                      <p style={{ marginTop: '10px', fontSize: '0.9rem' }}>
+                      <p style={{ marginTop: '10px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                         <strong>Reviewed by:</strong> {request.reviewedBy.name || request.reviewedBy.email}
                         <br />
                         <strong>Date:</strong> {new Date(request.reviewedAt).toLocaleString()}

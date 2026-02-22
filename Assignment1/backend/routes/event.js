@@ -71,8 +71,7 @@ router.get('/browse', authenticate, async (req, res) => {
     }
 
     let events = await Event.find(query)
-      .populate('organizer', 'organizerName category email')
-      .sort({ eventStartDate: 1 });
+      .populate('organizer', 'organizerName category email');
 
     // Auto-update event status based on current time
     events = events.map(event => {
@@ -89,6 +88,47 @@ router.get('/browse', authenticate, async (req, res) => {
       
       return eventObj;
     });
+
+    // Personalized event recommendations based on user preferences
+    if (req.user.role === 'participant' && !followedOnly && !trending && !search) {
+      const user = await User.findById(req.user._id).select('interests followedClubs');
+      const userInterests = (user.interests || []).map(i => i.toLowerCase());
+      const userFollowedClubs = (user.followedClubs || []).map(id => id.toString());
+
+      // Calculate relevance score for each event
+      events = events.map(event => {
+        let score = 0;
+        
+        // +10 points if from a followed club
+        if (event.organizer && userFollowedClubs.includes(event.organizer._id.toString())) {
+          score += 10;
+        }
+        
+        // +5 points for each matching interest/tag
+        if (event.eventTags && event.eventTags.length > 0 && userInterests.length > 0) {
+          const eventTagsLower = event.eventTags.map(tag => tag.toLowerCase());
+          const matches = eventTagsLower.filter(tag => 
+            userInterests.some(interest => 
+              tag.includes(interest) || interest.includes(tag)
+            )
+          );
+          score += matches.length * 5;
+        }
+        
+        return { ...event, relevanceScore: score };
+      });
+
+      // Sort by relevance score (DESC) first, then by date (ASC)
+      events.sort((a, b) => {
+        if (b.relevanceScore !== a.relevanceScore) {
+          return b.relevanceScore - a.relevanceScore;
+        }
+        return new Date(a.eventStartDate) - new Date(b.eventStartDate);
+      });
+    } else {
+      // Default: sort by date only
+      events.sort((a, b) => new Date(a.eventStartDate) - new Date(b.eventStartDate));
+    }
 
     // Trending events (most registrations in last 24 hours)
     if (trending === 'true') {
@@ -192,7 +232,28 @@ router.get('/:eventId', authenticate, async (req, res) => {
   }
 });
 
-// Get all organizers/clubs
+// Public endpoint: Get clubs for registration (no auth required)
+router.get('/clubs/public', async (req, res) => {
+  try {
+    const clubs = await User.find({ 
+      role: 'organizer', 
+      isActive: true 
+    }).select('organizerName category description');
+
+    res.json({
+      success: true,
+      count: clubs.length,
+      clubs
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to fetch clubs' 
+    });
+  }
+});
+
+// Get all organizers/clubs (authenticated)
 router.get('/clubs/list', authenticate, async (req, res) => {
   try {
     const clubs = await User.find({ 

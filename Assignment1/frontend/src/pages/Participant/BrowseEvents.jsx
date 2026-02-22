@@ -95,6 +95,16 @@ const BrowseEvents = () => {
         <p style={{ color: '#7f8c8d', marginTop: '10px' }}>
           Discover and register for exciting events at Felicity
         </p>
+        {!filters.search && !filters.followedOnly && !filters.trending && (
+          <p style={{ 
+            color: '#4ade80', 
+            fontSize: '0.9rem', 
+            marginTop: '8px',
+            fontStyle: 'italic' 
+          }}>
+            ✨ Events are personalized based on your interests and followed clubs
+          </p>
+        )}
 
         {/* Search and Filters */}
         <div className="card" style={{ marginTop: '30px' }}>

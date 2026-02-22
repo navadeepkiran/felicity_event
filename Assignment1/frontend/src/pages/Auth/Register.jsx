@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
+import api from '../../utils/api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -20,11 +21,26 @@ const Register = () => {
   });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [availableClubs, setAvailableClubs] = useState([]);
 
   const interestOptions = [
     'Technology', 'Cultural', 'Sports', 'Music', 'Dance', 
     'Drama', 'Art', 'Photography', 'Gaming', 'Hackathon'
   ];
+
+  useEffect(() => {
+    // Fetch available clubs for onboarding
+    const fetchClubs = async () => {
+      try {
+        const response = await api.get('/events/clubs/public');
+        setAvailableClubs(response.data.clubs || []);
+      } catch (error) {
+        // Silent fail - clubs selection is optional
+        console.log('Could not fetch clubs for registration');
+      }
+    };
+    fetchClubs();
+  }, []);
 
   const handleChange = (e) => {
     setErrorMessage('');
@@ -36,6 +52,13 @@ const Register = () => {
         interests: checked 
           ? [...prev.interests, value]
           : prev.interests.filter(i => i !== value)
+      }));
+    } else if (type === 'checkbox' && name === 'followedClubs') {
+      setFormData(prev => ({
+        ...prev,
+        followedClubs: checked 
+          ? [...prev.followedClubs, value]
+          : prev.followedClubs.filter(id => id !== value)
       }));
     } else if (name === 'contactNumber') {
       // Only allow digits and max 10 characters
@@ -242,6 +265,9 @@ const Register = () => {
 
           <div className="form-group">
             <label className="form-label">Interests (Optional)</label>
+            <p style={{ fontSize: '0.85rem', color: '#7f8c8d', marginBottom: '10px' }}>
+              Select your interests to get personalized event recommendations
+            </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
               {interestOptions.map(interest => (
                 <label key={interest} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
@@ -258,6 +284,40 @@ const Register = () => {
               ))}
             </div>
           </div>
+
+          {availableClubs.length > 0 && (
+            <div className="form-group" style={{ marginTop: '20px' }}>
+              <label className="form-label">Follow Clubs (Optional)</label>
+              <p style={{ fontSize: '0.85rem', color: '#7f8c8d', marginBottom: '10px' }}>
+                Follow clubs to see their events first
+              </p>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(2, 1fr)', 
+                gap: '10px',
+                maxHeight: '200px',
+                overflowY: 'auto',
+                padding: '10px',
+                border: '1px solid #34495e',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(52, 73, 94, 0.3)'
+              }}>
+                {availableClubs.map(club => (
+                  <label key={club._id} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      name="followedClubs"
+                      value={club._id}
+                      checked={formData.followedClubs.includes(club._id)}
+                      onChange={handleChange}
+                      style={{ marginRight: '8px' }}
+                    />
+                    <span style={{ fontSize: '0.9rem' }}>{club.organizerName}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
 
           {errorMessage && (
             <div style={{ 

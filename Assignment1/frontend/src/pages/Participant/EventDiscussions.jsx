@@ -17,6 +17,8 @@ const EventDiscussions = () => {
   const [replyContent, setReplyContent] = useState({});
   const [showReply, setShowReply] = useState({});
   const [previousCount, setPreviousCount] = useState(0);
+  const [previousAnnouncementIds, setPreviousAnnouncementIds] = useState(new Set());
+  const [previousPinnedIds, setPreviousPinnedIds] = useState(new Set());
 
   useEffect(() => {
     fetchEventAndDiscussions();
@@ -50,17 +52,74 @@ const EventDiscussions = () => {
       
       const newDiscussions = discussionsRes.data.discussions;
       
-      // Show notification if new discussions or replies arrived (only during polling)
+      // Show notifications for updates (only during polling)
       if (silent && discussions.length > 0) {
+        // Check for new messages
         const totalMessages = newDiscussions.reduce((sum, d) => sum + 1 + (d.replies?.length || 0), 0);
         if (totalMessages > previousCount) {
-          toast.info('New activity in discussion forum!');
+          toast.info('💬 New activity in discussion forum!');
         }
         setPreviousCount(totalMessages);
+        
+        // Check for new announcements
+        const currentAnnouncementIds = new Set(
+          newDiscussions.filter(d => d.isAnnouncement).map(d => d._id)
+        );
+        
+        const newAnnouncements = [...currentAnnouncementIds].filter(
+          id => !previousAnnouncementIds.has(id)
+        );
+        
+        if (newAnnouncements.length > 0) {
+          // Find the announcement title(s)
+          const announcementTitles = newDiscussions
+            .filter(d => newAnnouncements.includes(d._id))
+            .map(d => d.title);
+          
+          if (announcementTitles.length > 0) {
+            toast.warning(`📢 New Announcement: ${announcementTitles[0]}`, {
+              autoClose: 8000,
+              position: 'top-center'
+            });
+          }
+        }
+        
+        setPreviousAnnouncementIds(currentAnnouncementIds);
+        
+        // Check for newly pinned discussions
+        const currentPinnedIds = new Set(
+          newDiscussions.filter(d => d.isPinned).map(d => d._id)
+        );
+        
+        const newPinned = [...currentPinnedIds].filter(
+          id => !previousPinnedIds.has(id)
+        );
+        
+        if (newPinned.length > 0) {
+          const pinnedTitles = newDiscussions
+            .filter(d => newPinned.includes(d._id))
+            .map(d => d.title);
+          
+          if (pinnedTitles.length > 0) {
+            toast.info(`📌 Discussion Pinned: ${pinnedTitles[0]}`);
+          }
+        }
+        
+        setPreviousPinnedIds(currentPinnedIds);
       } else if (!silent) {
-        // Initial load
+        // Initial load - set up tracking
         const totalMessages = newDiscussions.reduce((sum, d) => sum + 1 + (d.replies?.length || 0), 0);
         setPreviousCount(totalMessages);
+        
+        const announcementIds = new Set(
+          newDiscussions.filter(d => d.isAnnouncement).map(d => d._id)
+        );
+        setPreviousAnnouncementIds(announcementIds);
+        
+        const pinnedIds = new Set(
+          newDiscussions.filter(d => d.isPinned).map(d => d._id)
+        );
+        setPreviousPinnedIds(pinnedIds);
       }
       
       setDiscussions(newDiscussions);

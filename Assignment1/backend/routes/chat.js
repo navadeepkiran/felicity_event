@@ -148,7 +148,7 @@ router.post('/:teamId/messages', async (req, res) => {
           type: 'new_discussion', // Reusing type for team messages
           title: '💬 New Team Message',
           message: `${req.user.firstName || 'Someone'} sent a message in ${team.teamName}`,
-          link: `/team/${teamId}/chat`,
+          link: `/events/${team.event}/team`,
           relatedEvent: team.event
         })
       );

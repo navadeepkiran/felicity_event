@@ -103,7 +103,7 @@ router.post('/event/:eventId', authenticate, async (req, res) => {
           type: 'new_discussion',
           title: '💬 New Discussion',
           message: `${req.user.firstName || 'Someone'} posted: "${title}"`,
-          link: `/event/${req.params.eventId}/discussions`,
+          link: `/events/${req.params.eventId}`,
           relatedEvent: req.params.eventId,
           relatedDiscussion: discussion._id
         })
@@ -172,7 +172,7 @@ router.post('/:discussionId/reply', authenticate, async (req, res) => {
           type: 'reply',
           title: '↩️ New Reply',
           message: `${req.user.firstName || 'Someone'} replied to: "${discussion.title}"`,
-          link: `/event/${discussion.event}/discussions`,
+          link: `/events/${discussion.event}`,
           relatedEvent: discussion.event,
           relatedDiscussion: discussion._id
         })
@@ -278,7 +278,7 @@ router.put('/:discussionId/pin', authenticate, async (req, res) => {
           type: 'pinned',
           title: '📌 Discussion Pinned',
           message: `"${discussion.title}" has been pinned by the organizer`,
-          link: `/event/${discussion.event._id}/discussions`,
+          link: `/events/${discussion.event._id}`,
           relatedEvent: discussion.event._id,
           relatedDiscussion: discussion._id
         })
@@ -305,30 +305,6 @@ router.put('/:discussionId/pin', authenticate, async (req, res) => {
 router.put('/:discussionId/announcement', authenticate, async (req, res) => {
   try {
     const discussion = await Discussion.findById(req.params.discussionId).populate('event');
-    // Send notifications to ALL registered participants when marked as announcement
-    if (discussion.isAnnouncement) {
-      const registrations = await Registration.find({
-        event: discussion.event._id,
-        status: { $in: ['registered', 'attended'] }
-      }).select('participant');
-
-      const notificationPromises = registrations.map(reg => 
-        Notification.create({
-          recipient: reg.participant,
-          type: 'announcement',
-          title: '📢 New Announcement',
-          message: `${discussion.title}`,
-          link: `/event/${discussion.event._id}/discussions`,
-          relatedEvent: discussion.event._id,
-          relatedDiscussion: discussion._id
-        })
-      );
-
-      await Promise.allSettled(notificationPromises);
-      
-      console.log(`📢 Sent ${registrations.length} announcement notifications for: ${discussion.title}`);
-    }
-
     
     if (!discussion) {
       return res.status(404).json({
@@ -350,6 +326,30 @@ router.put('/:discussionId/announcement', authenticate, async (req, res) => {
     discussion.isAnnouncement = !discussion.isAnnouncement;
 
     await discussion.save();
+
+    // Send notifications to ALL registered participants when marked as announcement
+    if (discussion.isAnnouncement) {
+      const registrations = await Registration.find({
+        event: discussion.event._id,
+        status: { $in: ['registered', 'attended'] }
+      }).select('participant');
+
+      const notificationPromises = registrations.map(reg => 
+        Notification.create({
+          recipient: reg.participant,
+          type: 'announcement',
+          title: '📢 New Announcement',
+          message: `${discussion.title}`,
+          link: `/events/${discussion.event._id}`,
+          relatedEvent: discussion.event._id,
+          relatedDiscussion: discussion._id
+        })
+      );
+
+      await Promise.allSettled(notificationPromises);
+      
+      console.log(`📢 Sent ${registrations.length} announcement notifications for: ${discussion.title}`);
+    }
 
     res.json({
       success: true,

@@ -2,6 +2,7 @@ import express from 'express';
 import Discussion from '../models/Discussion.js';
 import Event from '../models/Event.js';
 import Registration from '../models/Registration.js';
+import Notification from '../models/Notification.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -210,6 +211,28 @@ router.put('/:discussionId/pin', authenticate, async (req, res) => {
 
     await discussion.save();
 
+    // Send notifications to all registered participants when pinned
+    if (discussion.isPinned) {
+      const registrations = await Registration.find({
+        event: discussion.event._id,
+        status: { $in: ['registered', 'attended'] }
+      }).select('participant');
+
+      const notificationPromises = registrations.map(reg => 
+        Notification.create({
+          recipient: reg.participant,
+          type: 'pinned',
+          title: '📌 Discussion Pinned',
+          message: `"${discussion.title}" has been pinned by the organizer`,
+          link: `/event/${discussion.event._id}/discussions`,
+          relatedEvent: discussion.event._id,
+          relatedDiscussion: discussion._id
+        })
+      );
+
+      await Promise.allSettled(notificationPromises);
+    }
+
     res.json({
       success: true,
       message: discussion.isPinned ? 'Discussion pinned successfully' : 'Discussion unpinned successfully',
@@ -228,6 +251,30 @@ router.put('/:discussionId/pin', authenticate, async (req, res) => {
 router.put('/:discussionId/announcement', authenticate, async (req, res) => {
   try {
     const discussion = await Discussion.findById(req.params.discussionId).populate('event');
+    // Send notifications to ALL registered participants when marked as announcement
+    if (discussion.isAnnouncement) {
+      const registrations = await Registration.find({
+        event: discussion.event._id,
+        status: { $in: ['registered', 'attended'] }
+      }).select('participant');
+
+      const notificationPromises = registrations.map(reg => 
+        Notification.create({
+          recipient: reg.participant,
+          type: 'announcement',
+          title: '📢 New Announcement',
+          message: `${discussion.title}`,
+          link: `/event/${discussion.event._id}/discussions`,
+          relatedEvent: discussion.event._id,
+          relatedDiscussion: discussion._id
+        })
+      );
+
+      await Promise.allSettled(notificationPromises);
+      
+      console.log(`📢 Sent ${registrations.length} announcement notifications for: ${discussion.title}`);
+    }
+
     
     if (!discussion) {
       return res.status(404).json({

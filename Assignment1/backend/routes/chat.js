@@ -354,18 +354,23 @@ router.get('/:teamId/online', async (req, res) => {
     // Check team leader
     if (team.teamLeader.lastSeen && (now - new Date(team.teamLeader.lastSeen).getTime()) < onlineThreshold) {
       onlineMembers.push({
-        userId: team.teamLeader._id,
+        userId: team.teamLeader._id.toString(),
         firstName: team.teamLeader.firstName,
         lastName: team.teamLeader.lastName,
         isLeader: true
       });
     }
 
-    // Check members
+    // Check members (excluding team leader to avoid duplicates)
     for (const member of team.members) {
+      // Skip if this member is the team leader
+      if (member.user._id.toString() === team.teamLeader._id.toString()) {
+        continue;
+      }
+      
       if (member.user.lastSeen && (now - new Date(member.user.lastSeen).getTime()) < onlineThreshold) {
         onlineMembers.push({
-          userId: member.user._id,
+          userId: member.user._id.toString(),
           firstName: member.user.firstName,
           lastName: member.user.lastName,
           isLeader: false

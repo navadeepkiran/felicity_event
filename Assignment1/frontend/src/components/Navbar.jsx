@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -47,11 +48,16 @@ const Navbar = () => {
         <ul className="navbar-menu">
           {getNavLinks()}
           {user && (
-            <li>
-              <button onClick={logout} className="navbar-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                Logout
-              </button>
-            </li>
+            <>
+              <li>
+                <NotificationBell />
+              </li>
+              <li>
+                <button onClick={logout} className="navbar-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                  Logout
+                </button>
+              </li>
+            </>
           )}
         </ul>
       </div>

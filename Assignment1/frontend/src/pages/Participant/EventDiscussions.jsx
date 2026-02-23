@@ -35,7 +35,18 @@ const EventDiscussions = () => {
         api.get(`/events/${eventId}`),
         api.get(`/discussions/event/${eventId}`)
       ]);
-      setEvent(eventRes.data.event);
+      
+      const eventData = eventRes.data.event;
+      setEvent(eventData);
+      
+      // Debug logging
+      if (!silent) {
+        console.log('Event data:', eventData);
+        console.log('Event organizer:', eventData.organizer);
+        console.log('Current user:', user);
+        console.log('User ID:', user?._id);
+        console.log('User role:', user?.role);
+      }
       
       const newDiscussions = discussionsRes.data.discussions;
       
@@ -151,7 +162,31 @@ const EventDiscussions = () => {
   };
 
   const isOrganizer = () => {
-    return event && user && event.organizer === user._id;
+    if (!event || !user) {
+      console.log('isOrganizer: No event or user', { event, user });
+      return false;
+    }
+    
+    // Check if user role is organizer
+    if (user.role !== 'organizer') {
+      console.log('isOrganizer: User is not an organizer, role:', user.role);
+      return false;
+    }
+    
+    // Check if this organizer owns this event
+    const eventOrganizerId = typeof event.organizer === 'object' ? event.organizer._id : event.organizer;
+    const userId = user._id;
+    
+    const isOwner = eventOrganizerId?.toString() === userId?.toString();
+    console.log('isOrganizer check:', {
+      eventOrganizerId,
+      userId,
+      isOwner,
+      eventOrganizerType: typeof event.organizer,
+      match: eventOrganizerId?.toString() === userId?.toString()
+    });
+    
+    return isOwner;
   };
 
   const getUserDisplay = (user) => {

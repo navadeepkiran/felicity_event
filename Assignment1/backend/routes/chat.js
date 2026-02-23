@@ -1,8 +1,31 @@
 import express from 'express';
+import multer from 'multer';
+import path from 'path';
 import Message from '../models/Message.js';
 import Team from '../models/Team.js';
 import User from '../models/User.js';
 import { authenticate } from '../middleware/auth.js';
+
+// Configure multer for file uploads (in-memory storage for cloud deployment)
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow common file types
+    const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|txt|zip|rar/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only images, PDFs, and documents are allowed!'));
+    }
+  }
+});
 
 const router = express.Router();
 
@@ -110,6 +133,68 @@ router.post('/:teamId/messages', async (req, res) => {
     console.error('Send message error:', error);
     res.status(500).json({
       message: 'Error sending message',
+      error: error.message
+    });
+  }
+});
+
+// Upload file to team chat
+router.post('/:teamId/upload', upload.single('file'), async (req, res) => {
+  try {
+    const { teamId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded'
+      });
+    }
+
+    // Verify team exists
+    const team = await Team.findById(teamId);
+    if (!team) {
+      return res.status(404).json({
+        success: false,
+        message: 'Team not found'
+      });
+    }
+
+    // Verify user is a member
+    const isMember = team.teamLeader.toString() === req.user._id.toString() ||
+                     team.members.some(m => m.user.toString() === req.user._id.toString());
+
+    if (!isMember) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not a member of this team'
+      });
+    }
+
+    // For now, convert file to base64 data URL (works without cloud storage)
+    const fileDataUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+
+    // Create message with file
+    const message = await Message.create({
+      team: teamId,
+      sender: req.user._id,
+      content: req.file.originalname,
+      messageType: 'file',
+      fileUrl: fileDataUrl,
+      fileName: req.file.originalname,
+      fileType: req.file.mimetype
+    });
+
+    await message.populate('sender', 'firstName lastName email');
+
+    res.status(201).json({
+      success: true,
+      message
+    });
+  } catch (error) {
+    console.error('File upload error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error uploading file',
       error: error.message
     });
   }

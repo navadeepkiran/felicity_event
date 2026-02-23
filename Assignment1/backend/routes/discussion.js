@@ -1,6 +1,7 @@
 import express from 'express';
 import Discussion from '../models/Discussion.js';
 import Event from '../models/Event.js';
+import Registration from '../models/Registration.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -8,6 +9,34 @@ const router = express.Router();
 // Get all discussions for an event
 router.get('/event/:eventId', authenticate, async (req, res) => {
   try {
+    // Check if user is registered for this event (or is organizer)
+    const event = await Event.findById(req.params.eventId);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found'
+      });
+    }
+
+    const isOrganizer = event.organizer.toString() === req.user._id.toString();
+    let isRegistered = false;
+
+    if (req.user.role === 'participant') {
+      const registration = await Registration.findOne({
+        event: req.params.eventId,
+        participant: req.user._id,
+        status: { $in: ['registered', 'attended'] }
+      });
+      isRegistered = !!registration;
+    }
+
+    if (!isOrganizer && !isRegistered) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. You must be registered for this event to view discussions.'
+      });
+    }
+
     const discussions = await Discussion.find({ event: req.params.eventId })
       .populate('author', 'firstName lastName email role organizerName')
       .populate('replies.user', 'firstName lastName email role organizerName')
@@ -16,7 +45,8 @@ router.get('/event/:eventId', authenticate, async (req, res) => {
 
     res.json({
       success: true,
-      discussions
+      discussions,
+      isRegistered: isRegistered || isOrganizer
     });
   } catch (error) {
     console.error('Fetch discussions error:', error);

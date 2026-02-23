@@ -21,6 +21,7 @@ const TeamChat = () => {
   const messagesEndRef = useRef(null);
   const pollIntervalRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchTeamAndMessages();
@@ -124,8 +125,50 @@ const TeamChat = () => {
     return onlineMembers.some(m => m.userId === userId);
   };
 
-  const renderMessageContent = (content) => {
-    // Detect URLs in the message
+  const renderMessageContent = (message) => {
+    // Handle file messages
+    if (message.messageType === 'file' && message.fileUrl) {
+      const isImage = message.fileType?.startsWith('image/');
+      return (
+        <div>
+          <div style={{ marginBottom: '8px', fontWeight: '600' }}>
+            📎 {message.fileName || 'File attachment'}
+          </div>
+          {isImage ? (
+            <img 
+              src={message.fileUrl} 
+              alt={message.fileName}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '300px',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }}
+              onClick={() => window.open(message.fileUrl, '_blank')}
+            />
+          ) : (
+            <a
+              href={message.fileUrl}
+              download={message.fileName}
+              style={{
+                display: 'inline-block',
+                padding: '8px 12px',
+                backgroundColor: 'rgba(0,0,0,0.2)',
+                borderRadius: '6px',
+                color: 'inherit',
+                textDecoration: 'none',
+                fontSize: '0.9rem'
+              }}
+            >
+              ⬇️ Download {message.fileName}
+            </a>
+          )}
+        </div>
+      );
+    }
+
+    // Handle text messages with URL detection
+    const content = message.content || '';
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const parts = content.split(urlRegex);
     
@@ -200,6 +243,43 @@ const TeamChat = () => {
       toast.success('Message deleted');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete message');
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Check file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size must be less than 10MB');
+      return;
+    }
+
+    try {
+      setSending(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.post(`/chat/${teamId}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      setMessages([...messages, response.data.message]);
+      toast.success('File uploaded successfully');
+      
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      
+      setTimeout(() => scrollToBottom(), 100);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to upload file');
+    } finally {
+      setSending(false);
     }
   };
 
@@ -370,7 +450,7 @@ const TeamChat = () => {
                         position: 'relative'
                       }}>
                         <div style={{ whiteSpace: 'pre-wrap' }}>
-                          {renderMessageContent(message.content)}
+                          {renderMessageContent(message)}
                         </div>
                         <div style={{
                           fontSize: '0.75rem',
@@ -441,7 +521,31 @@ const TeamChat = () => {
               backgroundColor: 'var(--bg-elevated)'
             }}
           >
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+              accept="image/*,.pdf,.doc,.docx,.txt,.zip,.rar"
+            />
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+              {/* File Upload Button */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sending}
+                className="btn btn-secondary"
+                style={{
+                  padding: '12px 16px',
+                  fontSize: '1.2rem',
+                  height: 'fit-content',
+                  minWidth: '50px'
+                }}
+                title="Upload file (max 10MB)"
+              >
+                📎
+              </button>
               <div style={{ flex: 1 }}>
                 <textarea
                   value={newMessage}
@@ -511,7 +615,7 @@ const TeamChat = () => {
               marginTop: '10px',
               marginBottom: 0
             }}>
-              💡 Tip: Press Enter to send, Shift+Enter for new line • Paste links to share files/URLs
+              💡 Tip: Press Enter to send, Shift+Enter for new line • Click 📎 to upload files (max 10MB)
             </p>
           </form>
         </div>

@@ -102,6 +102,17 @@ const OrganizerEventDetails = () => {
               <button onClick={handlePublish} className="btn btn-success">Publish</button>
             )}
             <button 
+              onClick={() => navigate(`/events/${eventId}/discussions`)} 
+              className="btn"
+              style={{
+                background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-pink))',
+                border: 'none',
+                color: 'white'
+              }}
+            >
+              💬 Discussion Forum
+            </button>
+            <button 
               onClick={() => navigate(`/organizer/events/${eventId}/attendance`)} 
               className="btn btn-primary"
             >

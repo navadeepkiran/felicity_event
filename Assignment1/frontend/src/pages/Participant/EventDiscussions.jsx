@@ -16,22 +16,48 @@ const EventDiscussions = () => {
   const [newDiscussion, setNewDiscussion] = useState({ title: '', content: '' });
   const [replyContent, setReplyContent] = useState({});
   const [showReply, setShowReply] = useState({});
+  const [previousCount, setPreviousCount] = useState(0);
 
   useEffect(() => {
     fetchEventAndDiscussions();
+    
+    // Real-time polling - fetch every 5 seconds
+    const interval = setInterval(() => {
+      fetchEventAndDiscussions(true); // Silent fetch
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [eventId]);
 
-  const fetchEventAndDiscussions = async () => {
+  const fetchEventAndDiscussions = async (silent = false) => {
     try {
       const [eventRes, discussionsRes] = await Promise.all([
         api.get(`/events/${eventId}`),
         api.get(`/discussions/event/${eventId}`)
       ]);
       setEvent(eventRes.data.event);
-      setDiscussions(discussionsRes.data.discussions);
+      
+      const newDiscussions = discussionsRes.data.discussions;
+      
+      // Show notification if new discussions or replies arrived (only during polling)
+      if (silent && discussions.length > 0) {
+        const totalMessages = newDiscussions.reduce((sum, d) => sum + 1 + (d.replies?.length || 0), 0);
+        if (totalMessages > previousCount) {
+          toast.info('New activity in discussion forum!');
+        }
+        setPreviousCount(totalMessages);
+      } else if (!silent) {
+        // Initial load
+        const totalMessages = newDiscussions.reduce((sum, d) => sum + 1 + (d.replies?.length || 0), 0);
+        setPreviousCount(totalMessages);
+      }
+      
+      setDiscussions(newDiscussions);
     } catch (error) {
-      console.error('Fetch error:', error);
-      toast.error('Failed to load discussions');
+      if (!silent) {
+        console.error('Fetch error:', error);
+        toast.error('Failed to load discussions');
+      }
     } finally {
       setLoading(false);
     }
@@ -87,6 +113,47 @@ const EventDiscussions = () => {
     }
   };
 
+  const handleTogglePin = async (discussionId) => {
+    try {
+      const response = await api.put(`/discussions/${discussionId}/pin`);
+      toast.success(response.data.message);
+      fetchEventAndDiscussions();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to pin discussion');
+    }
+  };
+
+  const handleToggleAnnouncement = async (discussionId) => {
+    try {
+      const response = await api.put(`/discussions/${discussionId}/announcement`);
+      toast.success(response.data.message);
+      fetchEventAndDiscussions();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to toggle announcement');
+    }
+  };
+
+  const handleReaction = async (discussionId, type) => {
+    try {
+      await api.post(`/discussions/${discussionId}/reaction`, { type });
+      fetchEventAndDiscussions(true); // Silent fetch
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to add reaction');
+    }
+  };
+
+  const getReactionCount = (discussion, type) => {
+    return discussion.reactions?.filter(r => r.type === type).length || 0;
+  };
+
+  const hasUserReacted = (discussion, type) => {
+    return discussion.reactions?.some(r => r.user._id === user._id && r.type === type) || false;
+  };
+
+  const isOrganizer = () => {
+    return event && user && event.organizer === user._id;
+  };
+
   const getUserDisplay = (user) => {
     if (user.role === 'organizer') {
       return `${user.organizerName} (Organizer)`;
@@ -109,7 +176,7 @@ const EventDiscussions = () => {
               ← Back to Event
             </button>
             <h1>{event.eventName} - Discussion Forum</h1>
-            <p style={{ color: '#7f8c8d' }}>Ask questions and discuss with other participants</p>
+            <p style={{ color: 'var(--text-muted)' }}>Ask questions and discuss with other participants</p>
           </div>
         )}
 
@@ -164,48 +231,171 @@ const EventDiscussions = () => {
 
         <div>
           {discussions.length === 0 ? (
-            <div className="card" style={{ padding: '40px', textAlign: 'center', color: '#7f8c8d' }}>
+            <div className="card" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
               <p>No discussions yet. Be the first to start one!</p>
             </div>
           ) : (
             discussions.map(discussion => (
-              <div key={discussion._id} className="card" style={{ marginBottom: '20px', padding: '20px' }}>
+              <div 
+                key={discussion._id} 
+                className="card" 
+                style={{ 
+                  marginBottom: '20px', 
+                  padding: '20px',
+                  border: discussion.isPinned ? '2px solid var(--accent-cyan)' : undefined,
+                  backgroundColor: discussion.isAnnouncement ? 'rgba(88, 166, 255, 0.05)' : undefined
+                }}
+              >
+                {/* Badges */}
+                {(discussion.isPinned || discussion.isAnnouncement) && (
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                    {discussion.isPinned && (
+                      <span style={{ 
+                        backgroundColor: 'rgba(88, 166, 255, 0.2)',
+                        color: 'var(--accent-cyan)',
+                        padding: '4px 12px',
+                        borderRadius: '15px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        border: '1px solid var(--accent-cyan)'
+                      }}>
+                        📌 PINNED
+                      </span>
+                    )}
+                    {discussion.isAnnouncement && (
+                      <span style={{ 
+                        backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                        color: 'var(--accent-purple)',
+                        padding: '4px 12px',
+                        borderRadius: '15px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        border: '1px solid var(--accent-purple)'
+                      }}>
+                        📢 ANNOUNCEMENT
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '10px' }}>
                   <div>
                     <h3 style={{ marginBottom: '5px' }}>{discussion.title}</h3>
-                    <small style={{ color: '#7f8c8d' }}>
+                    <small style={{ color: 'var(--text-muted)' }}>
                       Posted by {getUserDisplay(discussion.author)} • {new Date(discussion.createdAt).toLocaleString()}
                     </small>
                   </div>
-                  {(discussion.author._id === user._id || user.role === 'organizer') && (
-                    <button
-                      onClick={() => handleDeleteDiscussion(discussion._id)}
-                      className="btn btn-danger"
-                      style={{ fontSize: '12px', padding: '5px 10px' }}
-                    >
-                      Delete
-                    </button>
-                  )}
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    {isOrganizer() && (
+                      <>
+                        <button
+                          onClick={() => handleTogglePin(discussion._id)}
+                          className="btn"
+                          style={{ 
+                            fontSize: '12px', 
+                            padding: '5px 10px',
+                            backgroundColor: discussion.isPinned ? 'var(--accent-cyan)' : 'var(--bg-elevated)',
+                            color: discussion.isPinned ? 'white' : 'var(--text-primary)',
+                            border: '1px solid var(--border-default)'
+                          }}
+                        >
+                          {discussion.isPinned ? '📌 Pinned' : '📌 Pin'}
+                        </button>
+                        <button
+                          onClick={() => handleToggleAnnouncement(discussion._id)}
+                          className="btn"
+                          style={{ 
+                            fontSize: '12px', 
+                            padding: '5px 10px',
+                            backgroundColor: discussion.isAnnouncement ? 'var(--accent-purple)' : 'var(--bg-elevated)',
+                            color: discussion.isAnnouncement ? 'white' : 'var(--text-primary)',
+                            border: '1px solid var(--border-default)'
+                          }}
+                        >
+                          {discussion.isAnnouncement ? '📢 Announcement' : '📢 Announce'}
+                        </button>
+                      </>
+                    )}
+                    {(discussion.author._id === user._id || isOrganizer()) && (
+                      <button
+                        onClick={() => handleDeleteDiscussion(discussion._id)}
+                        className="btn btn-danger"
+                        style={{ fontSize: '12px', padding: '5px 10px' }}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 </div>
                 
                 <p style={{ marginTop: '15px', whiteSpace: 'pre-wrap' }}>{discussion.content}</p>
 
+                {/* Reactions */}
+                <div style={{ 
+                  display: 'flex', 
+                  gap: '10px', 
+                  marginTop: '15px', 
+                  paddingTop: '15px', 
+                  borderTop: '1px solid var(--border-default)' 
+                }}>
+                  <button
+                    onClick={() => handleReaction(discussion._id, 'like')}
+                    className="btn"
+                    style={{
+                      fontSize: '14px',
+                      padding: '6px 12px',
+                      backgroundColor: hasUserReacted(discussion, 'like') ? 'rgba(88, 166, 255, 0.2)' : 'var(--bg-elevated)',
+                      border: hasUserReacted(discussion, 'like') ? '1px solid var(--accent-cyan)' : '1px solid var(--border-default)',
+                      color: hasUserReacted(discussion, 'like') ? 'var(--accent-cyan)' : 'var(--text-primary)'
+                    }}
+                  >
+                    👍 Like {getReactionCount(discussion, 'like') > 0 && `(${getReactionCount(discussion, 'like')})`}
+                  </button>
+                  <button
+                    onClick={() => handleReaction(discussion._id, 'helpful')}
+                    className="btn"
+                    style={{
+                      fontSize: '14px',
+                      padding: '6px 12px',
+                      backgroundColor: hasUserReacted(discussion, 'helpful') ? 'rgba(34, 197, 94, 0.2)' : 'var(--bg-elevated)',
+                      border: hasUserReacted(discussion, 'helpful') ? '1px solid #22c55e' : '1px solid var(--border-default)',
+                      color: hasUserReacted(discussion, 'helpful') ? '#22c55e' : 'var(--text-primary)'
+                    }}
+                  >
+                    ✅ Helpful {getReactionCount(discussion, 'helpful') > 0 && `(${getReactionCount(discussion, 'helpful')})`}
+                  </button>
+                  <button
+                    onClick={() => handleReaction(discussion._id, 'question')}
+                    className="btn"
+                    style={{
+                      fontSize: '14px',
+                      padding: '6px 12px',
+                      backgroundColor: hasUserReacted(discussion, 'question') ? 'rgba(251, 191, 36, 0.2)' : 'var(--bg-elevated)',
+                      border: hasUserReacted(discussion, 'question') ? '1px solid #fbbf24' : '1px solid var(--border-default)',
+                      color: hasUserReacted(discussion, 'question') ? '#fbbf24' : 'var(--text-primary)'
+                    }}
+                  >
+                    ❓ Question {getReactionCount(discussion, 'question') > 0 && `(${getReactionCount(discussion, 'question')})`}
+                  </button>
+                </div>
+
                 {/* Replies */}
                 {discussion.replies.length > 0 && (
-                  <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #ecf0f1' }}>
+                  <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border-default)' }}>
                     <h4 style={{ marginBottom: '15px', fontSize: '16px' }}>Replies ({discussion.replies.length})</h4>
                     {discussion.replies.map((reply, index) => (
                       <div key={index} style={{ 
-                        backgroundColor: '#f8f9fa', 
+                        backgroundColor: 'var(--bg-elevated)', 
                         padding: '15px', 
-                        borderRadius: '8px', 
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-default)',
                         marginBottom: '10px' 
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                          <strong>{getUserDisplay(reply.user)}</strong>
-                          <small style={{ color: '#7f8c8d' }}>{new Date(reply.createdAt).toLocaleString()}</small>
+                          <strong style={{ color: 'var(--text-primary)' }}>{getUserDisplay(reply.user)}</strong>
+                          <small style={{ color: 'var(--text-muted)' }}>{new Date(reply.createdAt).toLocaleString()}</small>
                         </div>
-                        <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{reply.content}</p>
+                        <p style={{ whiteSpace: 'pre-wrap', margin: 0, color: 'var(--text-primary)' }}>{reply.content}</p>
                       </div>
                     ))}
                   </div>

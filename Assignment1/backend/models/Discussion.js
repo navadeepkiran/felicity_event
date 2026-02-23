@@ -39,6 +39,33 @@ const discussionSchema = new mongoose.Schema({
     trim: true
   },
   replies: [replySchema],
+  isPinned: {
+    type: Boolean,
+    default: false
+  },
+  pinnedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  pinnedAt: {
+    type: Date
+  },
+  isAnnouncement: {
+    type: Boolean,
+    default: false
+  },
+  reactions: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    type: {
+      type: String,
+      enum: ['like', 'helpful', 'question'],
+      required: true
+    }
+  }],
   createdAt: {
     type: Date,
     default: Date.now

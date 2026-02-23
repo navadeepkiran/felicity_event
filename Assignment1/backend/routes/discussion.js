@@ -11,7 +11,8 @@ router.get('/event/:eventId', authenticate, async (req, res) => {
     const discussions = await Discussion.find({ event: req.params.eventId })
       .populate('author', 'firstName lastName email role organizerName')
       .populate('replies.user', 'firstName lastName email role organizerName')
-      .sort({ createdAt: -1 });
+      .populate('reactions.user', 'firstName lastName')
+      .sort({ isPinned: -1, createdAt: -1 }); // Pinned first, then by date
 
     res.json({
       success: true,
@@ -147,6 +148,146 @@ router.delete('/:discussionId', authenticate, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete discussion'
+    });
+  }
+});
+
+// Pin/Unpin a discussion (organizer only)
+router.put('/:discussionId/pin', authenticate, async (req, res) => {
+  try {
+    const discussion = await Discussion.findById(req.params.discussionId).populate('event');
+    
+    if (!discussion) {
+      return res.status(404).json({
+        success: false,
+        message: 'Discussion not found'
+      });
+    }
+
+    // Check if user is the event organizer
+    const isOrganizer = discussion.event.organizer.toString() === req.user._id.toString();
+
+    if (!isOrganizer) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only organizers can pin discussions'
+      });
+    }
+
+    discussion.isPinned = !discussion.isPinned;
+    discussion.pinnedBy = discussion.isPinned ? req.user._id : null;
+    discussion.pinnedAt = discussion.isPinned ? new Date() : null;
+
+    await discussion.save();
+
+    res.json({
+      success: true,
+      message: discussion.isPinned ? 'Discussion pinned successfully' : 'Discussion unpinned successfully',
+      discussion
+    });
+  } catch (error) {
+    console.error('Pin discussion error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to pin discussion'
+    });
+  }
+});
+
+// Mark as announcement (organizer only)
+router.put('/:discussionId/announcement', authenticate, async (req, res) => {
+  try {
+    const discussion = await Discussion.findById(req.params.discussionId).populate('event');
+    
+    if (!discussion) {
+      return res.status(404).json({
+        success: false,
+        message: 'Discussion not found'
+      });
+    }
+
+    // Check if user is the event organizer
+    const isOrganizer = discussion.event.organizer.toString() === req.user._id.toString();
+
+    if (!isOrganizer) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only organizers can mark announcements'
+      });
+    }
+
+    discussion.isAnnouncement = !discussion.isAnnouncement;
+
+    await discussion.save();
+
+    res.json({
+      success: true,
+      message: discussion.isAnnouncement ? 'Marked as announcement' : 'Removed from announcements',
+      discussion
+    });
+  } catch (error) {
+    console.error('Toggle announcement error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to toggle announcement'
+    });
+  }
+});
+
+// Toggle reaction on a discussion
+router.post('/:discussionId/reaction', authenticate, async (req, res) => {
+  try {
+    const { type } = req.body;
+
+    if (!type || !['like', 'helpful', 'question'].includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid reaction type'
+      });
+    }
+
+    const discussion = await Discussion.findById(req.params.discussionId);
+    
+    if (!discussion) {
+      return res.status(404).json({
+        success: false,
+        message: 'Discussion not found'
+      });
+    }
+
+    // Check if user already reacted with this type
+    const existingReactionIndex = discussion.reactions.findIndex(
+      r => r.user.toString() === req.user._id.toString() && r.type === type
+    );
+
+    if (existingReactionIndex !== -1) {
+      // Remove reaction
+      discussion.reactions.splice(existingReactionIndex, 1);
+    } else {
+      // Remove any other reaction by this user
+      discussion.reactions = discussion.reactions.filter(
+        r => r.user.toString() !== req.user._id.toString()
+      );
+      
+      // Add new reaction
+      discussion.reactions.push({
+        user: req.user._id,
+        type
+      });
+    }
+
+    await discussion.save();
+
+    res.json({
+      success: true,
+      message: 'Reaction updated',
+      discussion
+    });
+  } catch (error) {
+    console.error('Toggle reaction error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update reaction'
     });
   }
 });

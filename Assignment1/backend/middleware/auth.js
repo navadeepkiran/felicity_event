@@ -23,6 +23,9 @@ export const authenticate = async (req, res, next) => {
       });
     }
     
+    // Update lastSeen timestamp (don't wait for it to complete)
+    User.findByIdAndUpdate(user._id, { lastSeen: new Date() }).catch(() => {});
+    
     req.user = user;
     next();
   } catch (error) {

@@ -14,8 +14,13 @@ const TeamChat = () => {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [previousMessageCount, setPreviousMessageCount] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUsers, setTypingUsers] = useState([]);
+  const [onlineMembers, setOnlineMembers] = useState([]);
   const messagesEndRef = useRef(null);
   const pollIntervalRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
     fetchTeamAndMessages();
@@ -23,6 +28,8 @@ const TeamChat = () => {
     // Poll for new messages every 3 seconds
     pollIntervalRef.current = setInterval(() => {
       fetchMessages(false);
+      fetchTypingStatus();
+      fetchOnlineMembers();
     }, 3000);
 
     return () => {
@@ -62,12 +69,86 @@ const TeamChat = () => {
   const fetchMessages = async (showError = true) => {
     try {
       const response = await api.get(`/chat/${teamId}/messages`);
-      setMessages(response.data.messages);
+      const newMessages = response.data.messages;
+      
+      // Check for new messages and show notification
+      if (previousMessageCount > 0 && newMessages.length > previousMessageCount) {
+        const newMessageCount = newMessages.length - previousMessageCount;
+        const latestMessage = newMessages[newMessages.length - 1];
+        
+        // Don't notify for own messages
+        if (latestMessage.sender._id !== user._id) {
+          toast.info(`💬 ${latestMessage.sender.firstName}: ${latestMessage.content.substring(0, 50)}${latestMessage.content.length > 50 ? '...' : ''}`, {
+            position: 'top-right',
+            autoClose: 4000
+          });
+        }
+      }
+      
+      setPreviousMessageCount(newMessages.length);
+      setMessages(newMessages);
     } catch (error) {
       if (showError) {
         toast.error(error.response?.data?.message || 'Failed to load messages');
       }
     }
+  };
+
+  const fetchTypingStatus = async () => {
+    try {
+      const response = await api.get(`/chat/${teamId}/typing`);
+      setTypingUsers(response.data.typingUsers || []);
+    } catch (error) {
+      // Silently fail - typing status is not critical
+    }
+  };
+
+  const sendTypingStatus = async (typing) => {
+    try {
+      await api.post(`/chat/${teamId}/typing`, { isTyping: typing });
+    } catch (error) {
+      // Silently fail
+    }
+  };
+
+  const fetchOnlineMembers = async () => {
+    try {
+      const response = await api.get(`/chat/${teamId}/online`);
+      setOnlineMembers(response.data.onlineMembers || []);
+    } catch (error) {
+      // Silently fail - online status is not critical
+    }
+  };
+
+  const isUserOnline = (userId) => {
+    return onlineMembers.some(m => m.userId === userId);
+  };
+
+  const renderMessageContent = (content) => {
+    // Detect URLs in the message
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = content.split(urlRegex);
+    
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a 
+            key={index}
+            href={part} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              color: 'var(--accent-cyan)',
+              textDecoration: 'underline',
+              wordBreak: 'break-all'
+            }}
+          >
+            {part}
+          </a>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
   };
 
   const handleSendMessage = async (e) => {
@@ -91,6 +172,13 @@ const TeamChat = () => {
       // Add the new message to the list
       setMessages([...messages, response.data.message]);
       setNewMessage('');
+      
+      // Clear typing status
+      setIsTyping(false);
+      sendTypingStatus(false);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
       
       // Scroll to bottom
       setTimeout(() => scrollToBottom(), 100);
@@ -143,12 +231,56 @@ const TeamChat = () => {
 
   return (
     <Layout>
+      <style>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+        
+        .typing-dots {
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+        }
+        
+        .typing-dots span {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background-color: var(--text-muted);
+          animation: typingDots 1.4s infinite;
+        }
+        
+        .typing-dots span:nth-child(2) {
+          animation-delay: 0.2s;
+        }
+        
+        .typing-dots span:nth-child(3) {
+          animation-delay: 0.4s;
+        }
+        
+        @keyframes typingDots {
+          0%, 60%, 100% {
+            transform: translateY(0);
+            opacity: 0.7;
+          }
+          30% {
+            transform: translateY(-10px);
+            opacity: 1;
+          }
+        }
+      `}</style>
       <div style={{ marginTop: '30px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div>
             <h1>💬 Team Chat</h1>
             <p style={{ color: 'var(--text-muted)', marginTop: '5px' }}>
               {team.teamName} • {team.members.length}/{team.teamSize} members
+              {onlineMembers.length > 0 && <span> • {onlineMembers.length} online</span>}
             </p>
           </div>
           <button onClick={() => navigate(-1)} className="btn btn-secondary">
@@ -200,9 +332,25 @@ const TeamChat = () => {
                         color: 'var(--text-muted)',
                         marginBottom: '5px',
                         marginLeft: isOwnMessage ? '0' : '10px',
-                        marginRight: isOwnMessage ? '10px' : '0'
+                        marginRight: isOwnMessage ? '10px' : '0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
                       }}>
-                        {isOwnMessage ? 'You' : `${message.sender.firstName} ${message.sender.lastName}`}
+                        <span>
+                          {isOwnMessage ? 'You' : `${message.sender.firstName} ${message.sender.lastName}`}
+                        </span>
+                        {!isOwnMessage && isUserOnline(message.sender._id) && (
+                          <span style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: '#22c55e',
+                            display: 'inline-block',
+                            boxShadow: '0 0 4px #22c55e',
+                            animation: 'pulse 2s ease-in-out infinite'
+                          }} title="Online" />
+                        )}
                       </div>
                     )}
                     <div style={{
@@ -222,7 +370,7 @@ const TeamChat = () => {
                         position: 'relative'
                       }}>
                         <div style={{ whiteSpace: 'pre-wrap' }}>
-                          {message.content}
+                          {renderMessageContent(message.content)}
                         </div>
                         <div style={{
                           fontSize: '0.75rem',
@@ -261,6 +409,29 @@ const TeamChat = () => {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Typing Indicator */}
+          {typingUsers.length > 0 && (
+            <div style={{
+              padding: '10px 20px',
+              backgroundColor: 'var(--bg-secondary)',
+              borderTop: '1px solid var(--border-default)',
+              fontSize: '0.9rem',
+              color: 'var(--text-muted)',
+              fontStyle: 'italic'
+            }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <span className="typing-dots">
+                  <span></span><span></span><span></span>
+                </span>
+                {typingUsers.length === 1 
+                  ? `${typingUsers[0].firstName} is typing...`
+                  : typingUsers.length === 2
+                  ? `${typingUsers[0].firstName} and ${typingUsers[1].firstName} are typing...`
+                  : `${typingUsers.length} people are typing...`}
+              </span>
+            </div>
+          )}
+
           {/* Message Input Area */}
           <form 
             onSubmit={handleSendMessage}
@@ -274,7 +445,26 @@ const TeamChat = () => {
               <div style={{ flex: 1 }}>
                 <textarea
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={(e) => {
+                    setNewMessage(e.target.value);
+                    
+                    // Typing indicator logic
+                    if (!isTyping) {
+                      setIsTyping(true);
+                      sendTypingStatus(true);
+                    }
+                    
+                    // Clear previous timeout
+                    if (typingTimeoutRef.current) {
+                      clearTimeout(typingTimeoutRef.current);
+                    }
+                    
+                    // Set new timeout to stop typing after 2 seconds of inactivity
+                    typingTimeoutRef.current = setTimeout(() => {
+                      setIsTyping(false);
+                      sendTypingStatus(false);
+                    }, 2000);
+                  }}
                   placeholder="Type your message..."
                   rows={3}
                   disabled={sending}
@@ -321,7 +511,7 @@ const TeamChat = () => {
               marginTop: '10px',
               marginBottom: 0
             }}>
-              💡 Tip: Press Enter to send, Shift+Enter for new line
+              💡 Tip: Press Enter to send, Shift+Enter for new line • Paste links to share files/URLs
             </p>
           </form>
         </div>

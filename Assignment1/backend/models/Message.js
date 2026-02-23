@@ -19,8 +19,17 @@ const messageSchema = new mongoose.Schema({
   },
   messageType: {
     type: String,
-    enum: ['text', 'system'],
+    enum: ['text', 'file', 'link', 'system'],
     default: 'text'
+  },
+  fileUrl: {
+    type: String
+  },
+  fileName: {
+    type: String
+  },
+  fileType: {
+    type: String
   },
   createdAt: {
     type: Date,

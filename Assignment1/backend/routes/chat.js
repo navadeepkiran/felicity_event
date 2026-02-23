@@ -1,9 +1,13 @@
 import express from 'express';
 import Message from '../models/Message.js';
 import Team from '../models/Team.js';
+import User from '../models/User.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// Store typing status in memory (resets on server restart)
+const typingStatus = new Map(); // Map<teamId, Map<userId, {firstName, lastName, timestamp}>>
 
 // All routes require authentication
 router.use(authenticate);
@@ -154,6 +158,143 @@ router.delete('/:teamId/messages/:messageId', async (req, res) => {
       message: 'Error deleting message',
       error: error.message
     });
+  }
+});
+
+// Set typing status
+router.post('/:teamId/typing', async (req, res) => {
+  try {
+    const { teamId } = req.params;
+    const { isTyping } = req.body;
+
+    // Verify team exists and user is a member
+    const team = await Team.findById(teamId);
+    if (!team) {
+      return res.status(404).json({ message: 'Team not found' });
+    }
+
+    const isMember = team.teamLeader.toString() === req.user._id.toString() ||
+                     team.members.some(m => m.user.toString() === req.user._id.toString());
+
+    if (!isMember) {
+      return res.status(403).json({ message: 'Not a team member' });
+    }
+
+    // Get or create typing status map for this team
+    if (!typingStatus.has(teamId)) {
+      typingStatus.set(teamId, new Map());
+    }
+
+    const teamTyping = typingStatus.get(teamId);
+
+    if (isTyping) {
+      teamTyping.set(req.user._id.toString(), {
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
+        timestamp: Date.now()
+      });
+    } else {
+      teamTyping.delete(req.user._id.toString());
+    }
+
+    // Clean up old typing statuses (older than 5 seconds)
+    const now = Date.now();
+    for (const [userId, data] of teamTyping.entries()) {
+      if (now - data.timestamp > 5000) {
+        teamTyping.delete(userId);
+      }
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Typing status error:', error);
+    res.status(500).json({ message: 'Error updating typing status' });
+  }
+});
+
+// Get typing status
+router.get('/:teamId/typing', async (req, res) => {
+  try {
+    const { teamId } = req.params;
+
+    const teamTyping = typingStatus.get(teamId);
+    if (!teamTyping) {
+      return res.json({ success: true, typingUsers: [] });
+    }
+
+    // Clean up old typing statuses
+    const now = Date.now();
+    const activeTyping = [];
+    
+    for (const [userId, data] of teamTyping.entries()) {
+      if (now - data.timestamp <= 5000 && userId !== req.user._id.toString()) {
+        activeTyping.push({
+          userId,
+          firstName: data.firstName,
+          lastName: data.lastName
+        });
+      } else if (now - data.timestamp > 5000) {
+        teamTyping.delete(userId);
+      }
+    }
+
+    res.json({
+      success: true,
+      typingUsers: activeTyping
+    });
+  } catch (error) {
+    console.error('Get typing status error:', error);
+    res.status(500).json({ message: 'Error fetching typing status' });
+  }
+});
+
+// Get online team members
+router.get('/:teamId/online', async (req, res) => {
+  try {
+    const { teamId } = req.params;
+
+    const team = await Team.findById(teamId)
+      .populate('teamLeader', 'firstName lastName lastSeen')
+      .populate('members.user', 'firstName lastName lastSeen');
+
+    if (!team) {
+      return res.status(404).json({ message: 'Team not found' });
+    }
+
+    const now = Date.now();
+    const onlineThreshold = 2 * 60 * 1000; // 2 minutes
+
+    const onlineMembers = [];
+
+    // Check team leader
+    if (team.teamLeader.lastSeen && (now - new Date(team.teamLeader.lastSeen).getTime()) < onlineThreshold) {
+      onlineMembers.push({
+        userId: team.teamLeader._id,
+        firstName: team.teamLeader.firstName,
+        lastName: team.teamLeader.lastName,
+        isLeader: true
+      });
+    }
+
+    // Check members
+    for (const member of team.members) {
+      if (member.user.lastSeen && (now - new Date(member.user.lastSeen).getTime()) < onlineThreshold) {
+        onlineMembers.push({
+          userId: member.user._id,
+          firstName: member.user.firstName,
+          lastName: member.user.lastName,
+          isLeader: false
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      onlineMembers
+    });
+  } catch (error) {
+    console.error('Get online members error:', error);
+    res.status(500).json({ message: 'Error fetching online status' });
   }
 });
 

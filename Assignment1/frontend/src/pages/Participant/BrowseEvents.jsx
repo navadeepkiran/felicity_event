@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import api from '../../utils/api';
 import { toast } from 'react-toastify';
+import Fuse from 'fuse.js';
 
 const BrowseEvents = () => {
-  const [events, setEvents] = useState([]);
+  const [allEvents, setAllEvents] = useState([]); // Store all fetched events
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     search: '',
@@ -15,21 +16,56 @@ const BrowseEvents = () => {
     trending: false
   });
 
+  // Configure Fuse.js for fuzzy search
+  const fuse = useMemo(() => {
+    return new Fuse(allEvents, {
+      keys: [
+        { name: 'eventName', weight: 2 }, // Event name has higher weight
+        { name: 'eventDescription', weight: 1 },
+        { name: 'eventTags', weight: 1.5 },
+        { name: 'organizer.organizerName', weight: 1.5 } // Also search organizer name
+      ],
+      threshold: 0.4, // 0 = exact match, 1 = match anything (0.4 is good for typos)
+      includeScore: true,
+      minMatchCharLength: 2,
+      ignoreLocation: true // Search entire string, not just beginning
+    });
+  }, [allEvents]);
+
+  // Apply fuzzy search on top of other filters
+  const events = useMemo(() => {
+    let filtered = allEvents;
+
+    // Apply fuzzy search if search term exists
+    if (filters.search && filters.search.trim().length >= 2) {
+      const results = fuse.search(filters.search);
+      filtered = results.map(result => result.item);
+    }
+
+    // Apply other filters
+    if (filters.eventType) {
+      filtered = filtered.filter(event => event.eventType === filters.eventType);
+    }
+    if (filters.eligibility) {
+      filtered = filtered.filter(event => event.eligibility === filters.eligibility);
+    }
+
+    return filtered;
+  }, [allEvents, filters, fuse]);
+
   useEffect(() => {
     fetchEvents();
-  }, [filters]);
+  }, [filters.followedOnly, filters.trending]); // Only refetch on these filters
 
   const fetchEvents = async () => {
     try {
       const params = new URLSearchParams();
-      if (filters.search) params.append('search', filters.search);
-      if (filters.eventType) params.append('eventType', filters.eventType);
-      if (filters.eligibility) params.append('eligibility', filters.eligibility);
+      // Don't send search, eventType, eligibility to backend - handle via Fuse.js
       if (filters.followedOnly) params.append('followedOnly', 'true');
       if (filters.trending) params.append('trending', 'true');
 
       const response = await api.get(`/events/browse?${params.toString()}`);
-      setEvents(response.data.events);
+      setAllEvents(response.data.events);
     } catch (error) {
       toast.error('Failed to fetch events');
     } finally {
@@ -42,7 +78,11 @@ const BrowseEvents = () => {
       ...prev,
       [field]: value
     }));
-    setLoading(true);
+    
+    // Only show loading for filters that require refetching
+    if (field === 'followedOnly' || field === 'trending') {
+      setLoading(true);
+    }
   };
 
   const renderEventCard = (event) => {

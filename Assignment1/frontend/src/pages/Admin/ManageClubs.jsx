@@ -546,9 +546,17 @@ const ManageClubs = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Category</label>
-                <input className="form-input" required
+                <select className="form-input" required
                   value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})} />
+                  onChange={(e) => setFormData({...formData, category: e.target.value})}>
+                  <option value="">Select a category</option>
+                  <option value="Cultural">Cultural</option>
+                  <option value="Technical">Technical</option>
+                  <option value="Sports">Sports</option>
+                  <option value="Literary">Literary</option>
+                  <option value="Social">Social</option>
+                  <option value="Academic">Academic</option>
+                </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Description</label>

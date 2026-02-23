@@ -68,7 +68,8 @@ const userSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    required: function() { return this.role === 'organizer'; }
+    required: function() { return this.role === 'organizer'; },
+    enum: ['Cultural', 'Technical', 'Sports', 'Literary', 'Social', 'Academic']
   },
   description: {
     type: String,

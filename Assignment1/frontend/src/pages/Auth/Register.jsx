@@ -122,9 +122,6 @@ const Register = () => {
       registrationData.collegeName = 'IIIT Hyderabad';
     }
     
-    // Add captcha token
-    registrationData.captchaToken = 'production-bypass';
-    
     const result = await register(registrationData);
 
     if (result.success) {

@@ -70,11 +70,19 @@ const EventDiscussions = () => {
           id => !previousAnnouncementIds.has(id)
         );
         
+        console.log('Checking announcements:', {
+          currentAnnouncementIds: [...currentAnnouncementIds],
+          previousAnnouncementIds: [...previousAnnouncementIds],
+          newAnnouncements
+        });
+        
         if (newAnnouncements.length > 0) {
           // Find the announcement title(s)
           const announcementTitles = newDiscussions
             .filter(d => newAnnouncements.includes(d._id))
             .map(d => d.title);
+          
+          console.log('🔔 NEW ANNOUNCEMENT DETECTED:', announcementTitles);
           
           if (announcementTitles.length > 0) {
             toast.warning(`📢 New Announcement: ${announcementTitles[0]}`, {
@@ -95,10 +103,18 @@ const EventDiscussions = () => {
           id => !previousPinnedIds.has(id)
         );
         
+        console.log('Checking pinned:', {
+          currentPinnedIds: [...currentPinnedIds],
+          previousPinnedIds: [...previousPinnedIds],
+          newPinned
+        });
+        
         if (newPinned.length > 0) {
           const pinnedTitles = newDiscussions
             .filter(d => newPinned.includes(d._id))
             .map(d => d.title);
+          
+          console.log('🔔 NEW PINNED DISCUSSION DETECTED:', pinnedTitles);
           
           if (pinnedTitles.length > 0) {
             toast.info(`📌 Discussion Pinned: ${pinnedTitles[0]}`);
@@ -185,8 +201,19 @@ const EventDiscussions = () => {
 
   const handleTogglePin = async (discussionId) => {
     try {
+      const discussion = discussions.find(d => d._id === discussionId);
       const response = await api.put(`/discussions/${discussionId}/pin`);
-      toast.success(response.data.message);
+      
+      // Show prominent notification for organizer
+      if (discussion && response.data.discussion?.isPinned) {
+        toast.info(`📌 "${discussion.title}" has been pinned and all participants will be notified`, {
+          autoClose: 5000,
+          position: 'top-center'
+        });
+      } else {
+        toast.success(response.data.message);
+      }
+      
       fetchEventAndDiscussions();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to pin discussion');
@@ -195,8 +222,19 @@ const EventDiscussions = () => {
 
   const handleToggleAnnouncement = async (discussionId) => {
     try {
+      const discussion = discussions.find(d => d._id === discussionId);
       const response = await api.put(`/discussions/${discussionId}/announcement`);
-      toast.success(response.data.message);
+      
+      // Show prominent notification for organizer
+      if (discussion && response.data.discussion?.isAnnouncement) {
+        toast.warning(`📢 "${discussion.title}" marked as announcement - all participants will be notified!`, {
+          autoClose: 6000,
+          position: 'top-center'
+        });
+      } else {
+        toast.success(response.data.message);
+      }
+      
       fetchEventAndDiscussions();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to toggle announcement');

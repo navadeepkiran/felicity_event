@@ -314,47 +314,6 @@ const EventDiscussions = () => {
             </button>
             <h1>{event.eventName} - Discussion Forum</h1>
             <p style={{ color: 'var(--text-muted)' }}>Ask questions and discuss with other participants</p>
-            
-            {/* Registration Status Banner */}
-            {isRegistered ? (
-              <div style={{
-                marginTop: '15px',
-                padding: '12px 20px',
-                backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                border: '1px solid rgba(34, 197, 94, 0.3)',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}>
-                <span style={{ fontSize: '1.2rem' }}>✅</span>
-                <div>
-                  <strong style={{ color: '#22c55e' }}>You're registered for this event</strong>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                    You'll receive notifications for announcements and important updates
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div style={{
-                marginTop: '15px',
-                padding: '12px 20px',
-                backgroundColor: 'rgba(234, 179, 8, 0.1)',
-                border: '1px solid rgba(234, 179, 8, 0.3)',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px'
-              }}>
-                <span style={{ fontSize: '1.2rem' }}>ℹ️</span>
-                <div>
-                  <strong style={{ color: '#eab308' }}>Register to participate in discussions</strong>
-                  <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                    Only registered participants can view and join discussions for this event
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
         )}
 

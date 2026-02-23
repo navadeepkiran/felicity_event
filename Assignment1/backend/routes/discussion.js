@@ -89,6 +89,33 @@ router.post('/event/:eventId', authenticate, async (req, res) => {
     await discussion.save();
     await discussion.populate('author', 'firstName lastName email role organizerName');
 
+    // Send notifications to all registered participants (except author)
+    try {
+      const registrations = await Registration.find({
+        event: req.params.eventId,
+        status: { $in: ['registered', 'attended'] },
+        participant: { $ne: req.user._id } // Exclude the author
+      }).select('participant');
+
+      const notificationPromises = registrations.map(reg => 
+        Notification.create({
+          recipient: reg.participant,
+          type: 'new_discussion',
+          title: '💬 New Discussion',
+          message: `${req.user.firstName || 'Someone'} posted: "${title}"`,
+          link: `/event/${req.params.eventId}/discussions`,
+          relatedEvent: req.params.eventId,
+          relatedDiscussion: discussion._id
+        })
+      );
+
+      await Promise.allSettled(notificationPromises);
+      console.log(`💬 Sent ${registrations.length} new discussion notifications for: ${title}`);
+    } catch (notifError) {
+      console.error('Error sending discussion notifications:', notifError);
+      // Don't fail the request if notifications fail
+    }
+
     res.status(201).json({
       success: true,
       message: 'Discussion created successfully',
@@ -130,6 +157,33 @@ router.post('/:discussionId/reply', authenticate, async (req, res) => {
 
     await discussion.save();
     await discussion.populate('replies.user', 'firstName lastName email role organizerName');
+
+    // Send notifications to discussion author and all registered participants (except reply author)
+    try {
+      const registrations = await Registration.find({
+        event: discussion.event,
+        status: { $in: ['registered', 'attended'] },
+        participant: { $ne: req.user._id } // Exclude the reply author
+      }).select('participant');
+
+      const notificationPromises = registrations.map(reg => 
+        Notification.create({
+          recipient: reg.participant,
+          type: 'reply',
+          title: '↩️ New Reply',
+          message: `${req.user.firstName || 'Someone'} replied to: "${discussion.title}"`,
+          link: `/event/${discussion.event}/discussions`,
+          relatedEvent: discussion.event,
+          relatedDiscussion: discussion._id
+        })
+      );
+
+      await Promise.allSettled(notificationPromises);
+      console.log(`↩️ Sent ${registrations.length} reply notifications for: ${discussion.title}`);
+    } catch (notifError) {
+      console.error('Error sending reply notifications:', notifError);
+      // Don't fail the request if notifications fail
+    }
 
     res.json({
       success: true,

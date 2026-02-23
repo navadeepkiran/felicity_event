@@ -4,6 +4,7 @@ import path from 'path';
 import Message from '../models/Message.js';
 import Team from '../models/Team.js';
 import User from '../models/User.js';
+import Notification from '../models/Notification.js';
 import { authenticate } from '../middleware/auth.js';
 
 // Configure multer for file uploads (in-memory storage for cloud deployment)
@@ -124,6 +125,40 @@ router.post('/:teamId/messages', async (req, res) => {
 
     // Populate sender details before sending response
     await message.populate('sender', 'firstName lastName email');
+
+    // Send notifications to all team members (except sender)
+    try {
+      const teamMembers = [];
+      
+      // Add team leader if not the sender
+      if (team.teamLeader.toString() !== req.user._id.toString()) {
+        teamMembers.push(team.teamLeader);
+      }
+      
+      // Add other team members (excluding sender)
+      team.members.forEach(member => {
+        if (member.user.toString() !== req.user._id.toString()) {
+          teamMembers.push(member.user);
+        }
+      });
+
+      const notificationPromises = teamMembers.map(memberId => 
+        Notification.create({
+          recipient: memberId,
+          type: 'new_discussion', // Reusing type for team messages
+          title: '💬 New Team Message',
+          message: `${req.user.firstName || 'Someone'} sent a message in ${team.teamName}`,
+          link: `/team/${teamId}/chat`,
+          relatedEvent: team.event
+        })
+      );
+
+      await Promise.allSettled(notificationPromises);
+      console.log(`💬 Sent ${teamMembers.length} team chat notifications`);
+    } catch (notifError) {
+      console.error('Error sending team chat notifications:', notifError);
+      // Don't fail the request if notifications fail
+    }
 
     res.status(201).json({
       success: true,

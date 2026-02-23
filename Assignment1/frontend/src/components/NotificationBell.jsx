@@ -124,11 +124,14 @@ const NotificationBell = () => {
           background: 'transparent',
           border: 'none',
           cursor: 'pointer',
-          fontSize: '1.5rem',
-          padding: '8px',
-          borderRadius: '50%',
-          transition: 'background 0.3s',
-          color: 'var(--text-primary)'
+          fontSize: '1.2rem',
+          padding: '6px 10px',
+          borderRadius: '6px',
+          transition: 'background 0.2s',
+          color: 'var(--text-primary)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}
         onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--bg-elevated)'}
         onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
@@ -138,14 +141,14 @@ const NotificationBell = () => {
         {unreadCount > 0 && (
           <span style={{
             position: 'absolute',
-            top: '4px',
-            right: '4px',
+            top: '2px',
+            right: '2px',
             backgroundColor: '#e74c3c',
             color: 'white',
             borderRadius: '50%',
-            width: '18px',
-            height: '18px',
-            fontSize: '0.7rem',
+            width: '16px',
+            height: '16px',
+            fontSize: '0.65rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

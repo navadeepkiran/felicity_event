@@ -523,32 +523,44 @@ const ManageClubs = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          backgroundColor: 'rgba(0,0,0,0.8)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
         }}>
           <div style={{
-            background: 'white',
-            borderRadius: '8px',
+            background: 'linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-secondary) 100%)',
+            borderRadius: '12px',
             padding: '30px',
             width: '90%',
-            maxWidth: '500px'
+            maxWidth: '500px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            border: '1px solid var(--border-default)'
           }}>
-            <h2>Create New Club</h2>
+            <h2 style={{ color: 'var(--accent-cyan)', marginBottom: '25px' }}>Create New Club</h2>
             <form onSubmit={handleCreateClub} style={{ marginTop: '20px' }}>
               <div className="form-group">
-                <label className="form-label">Organizer Name</label>
+                <label className="form-label" style={{ color: 'var(--text-primary)' }}>Organizer Name</label>
                 <input className="form-input" required
                   value={formData.organizerName}
-                  onChange={(e) => setFormData({...formData, organizerName: e.target.value})} />
+                  onChange={(e) => setFormData({...formData, organizerName: e.target.value})}
+                  style={{ 
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-primary)'
+                  }} />
               </div>
               <div className="form-group">
-                <label className="form-label">Category</label>
+                <label className="form-label" style={{ color: 'var(--text-primary)' }}>Category</label>
                 <select className="form-input" required
                   value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}>
+                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                  style={{ 
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-primary)'
+                  }}>
                   <option value="">Select a category</option>
                   <option value="Cultural">Cultural</option>
                   <option value="Technical">Technical</option>
@@ -559,16 +571,26 @@ const ManageClubs = () => {
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Description</label>
+                <label className="form-label" style={{ color: 'var(--text-primary)' }}>Description</label>
                 <textarea className="form-input" rows="3" required
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})} />
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  style={{ 
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-primary)'
+                  }} />
               </div>
               <div className="form-group">
-                <label className="form-label">Contact Email</label>
+                <label className="form-label" style={{ color: 'var(--text-primary)' }}>Contact Email</label>
                 <input className="form-input" type="email" required
                   value={formData.contactEmail}
-                  onChange={(e) => setFormData({...formData, contactEmail: e.target.value})} />
+                  onChange={(e) => setFormData({...formData, contactEmail: e.target.value})}
+                  style={{ 
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-primary)'
+                  }} />
               </div>
               <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                 <button type="submit" className="btn btn-success">Create</button>

@@ -155,8 +155,12 @@ router.get('/browse', authenticate, async (req, res) => {
       ]);
 
       const trendingEventIds = trendingEvents.map(e => e._id);
-      events = await Event.find({ _id: { $in: trendingEventIds }, status: 'published' })
+      const eventsData = await Event.find({ _id: { $in: trendingEventIds }, status: 'published' })
         .populate('organizer', 'organizerName category email');
+      
+      // Maintain the sort order from aggregation (most registrations first)
+      const eventMap = new Map(eventsData.map(e => [e._id.toString(), e]));
+      events = trendingEventIds.map(id => eventMap.get(id.toString())).filter(Boolean);
     }
 
     res.json({

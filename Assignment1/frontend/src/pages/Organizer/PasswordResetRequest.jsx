@@ -53,9 +53,9 @@ const PasswordResetRequest = () => {
 
   const getStatusBadge = (status) => {
     const statusStyles = {
-      pending: { bg: '#fff3cd', color: '#856404', text: '⏳ Pending' },
-      approved: { bg: '#d4edda', color: '#155724', text: '✓ Approved' },
-      rejected: { bg: '#f8d7da', color: '#721c24', text: '✗ Rejected' }
+      pending: { bg: 'rgba(255, 193, 7, 0.2)', color: '#ffc107', text: '⏳ Pending' },
+      approved: { bg: 'rgba(34, 197, 94, 0.2)', color: '#22c55e', text: '✓ Approved' },
+      rejected: { bg: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', text: '✗ Rejected' }
     };
     const style = statusStyles[status] || statusStyles.pending;
     
@@ -65,7 +65,8 @@ const PasswordResetRequest = () => {
         borderRadius: '20px', 
         backgroundColor: style.bg, 
         color: style.color,
-        fontSize: '0.9rem'
+        fontSize: '0.9rem',
+        border: `1px solid ${style.color}`
       }}>
         {style.text}
       </span>
@@ -97,8 +98,8 @@ const PasswordResetRequest = () => {
 
         {!showForm && !hasPendingRequest && (
           <div className="card" style={{ marginBottom: '30px', padding: '30px', textAlign: 'center' }}>
-            <h2 style={{ marginBottom: '15px' }}>Request Password Reset</h2>
-            <p style={{ color: '#7f8c8d', marginBottom: '20px' }}>
+            <h2 style={{ marginBottom: '15px', color: 'var(--accent-cyan)' }}>Request Password Reset</h2>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>
               Forgot your password? Submit a request to the admin for approval.
             </p>
             <button 
@@ -127,7 +128,7 @@ const PasswordResetRequest = () => {
                   minLength={10}
                   style={{ resize: 'vertical' }}
                 />
-                <small style={{ color: '#7f8c8d' }}>
+                <small style={{ color: 'var(--text-muted)' }}>
                   {reason.length}/10 characters minimum
                 </small>
               </div>
@@ -160,22 +161,22 @@ const PasswordResetRequest = () => {
           <div style={{ 
             marginBottom: '30px', 
             padding: '20px', 
-            backgroundColor: '#fff3cd', 
+            backgroundColor: 'rgba(255, 193, 7, 0.15)', 
             borderRadius: '8px',
             border: '1px solid #ffc107'
           }}>
-            <strong>⏳ Pending Request</strong>
-            <p style={{ marginTop: '10px' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>⏳ Pending Request</strong>
+            <p style={{ marginTop: '10px', color: 'var(--text-primary)' }}>
               You have a pending password reset request. Please wait for admin approval.
             </p>
           </div>
         )}
 
         <div className="card" style={{ padding: '30px' }}>
-          <h2 style={{ marginBottom: '20px' }}>Request History</h2>
+          <h2 style={{ marginBottom: '20px', color: 'var(--accent-cyan)' }}>Request History</h2>
           
           {requests.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#7f8c8d' }}>
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
               <p>No password reset requests yet.</p>
             </div>
           ) : (
@@ -185,16 +186,16 @@ const PasswordResetRequest = () => {
                   key={request._id}
                   style={{ 
                     padding: '20px', 
-                    backgroundColor: '#f8f9fa', 
+                    backgroundColor: 'var(--bg-elevated)', 
                     borderRadius: '8px',
-                    border: '1px solid #dee2e6'
+                    border: '1px solid var(--border-default)'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
                     <div>
-                      <strong>Request #{request._id.slice(-8)}</strong>
+                      <strong style={{ color: 'var(--text-primary)' }}>Request #{request._id.slice(-8)}</strong>
                       <br />
-                      <small style={{ color: '#7f8c8d' }}>
+                      <small style={{ color: 'var(--text-muted)' }}>
                         Submitted: {new Date(request.createdAt).toLocaleString()}
                       </small>
                     </div>
@@ -202,8 +203,8 @@ const PasswordResetRequest = () => {
                   </div>
 
                   <div style={{ marginBottom: '15px' }}>
-                    <strong>Reason:</strong>
-                    <p style={{ marginTop: '5px', color: '#495057' }}>
+                    <strong style={{ color: 'var(--text-primary)' }}>Reason:</strong>
+                    <p style={{ marginTop: '5px', color: 'var(--text-primary)' }}>
                       {request.reason}
                     </p>
                   </div>
@@ -211,16 +212,17 @@ const PasswordResetRequest = () => {
                   {request.status === 'approved' && (
                     <div style={{ 
                       padding: '15px', 
-                      backgroundColor: '#d4edda', 
+                      backgroundColor: 'rgba(34, 197, 94, 0.15)', 
                       borderRadius: '5px',
-                      color: '#155724'
+                      border: '1px solid #22c55e',
+                      color: '#22c55e'
                     }}>
                       <strong>✓ Approved</strong>
-                      <p style={{ marginTop: '10px' }}>
+                      <p style={{ marginTop: '10px', color: 'var(--text-primary)' }}>
                         Your password has been reset. Check your email or contact admin for the new password.
                       </p>
                       {request.reviewedAt && (
-                        <small style={{ display: 'block', marginTop: '10px' }}>
+                        <small style={{ display: 'block', marginTop: '10px', color: 'var(--text-muted)' }}>
                           Approved on: {new Date(request.reviewedAt).toLocaleString()}
                         </small>
                       )}
@@ -230,18 +232,19 @@ const PasswordResetRequest = () => {
                   {request.status === 'rejected' && (
                     <div style={{ 
                       padding: '15px', 
-                      backgroundColor: '#f8d7da', 
+                      backgroundColor: 'rgba(239, 68, 68, 0.15)', 
                       borderRadius: '5px',
-                      color: '#721c24'
+                      border: '1px solid #ef4444',
+                      color: '#ef4444'
                     }}>
                       <strong>✗ Rejected</strong>
                       {request.adminNotes && (
-                        <p style={{ marginTop: '10px' }}>
+                        <p style={{ marginTop: '10px', color: 'var(--text-primary)' }}>
                           <strong>Admin Notes:</strong> {request.adminNotes}
                         </p>
                       )}
                       {request.reviewedAt && (
-                        <small style={{ display: 'block', marginTop: '10px' }}>
+                        <small style={{ display: 'block', marginTop: '10px', color: 'var(--text-muted)' }}>
                           Rejected on: {new Date(request.reviewedAt).toLocaleString()}
                         </small>
                       )}

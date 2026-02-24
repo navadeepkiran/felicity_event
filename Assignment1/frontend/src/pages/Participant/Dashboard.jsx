@@ -97,6 +97,7 @@ const ParticipantDashboard = () => {
         <div style={{ marginTop: '30px', display: 'flex', gap: '10px', borderBottom: '2px solid #ecf0f1' }}>
           <button
             onClick={() => setActiveTab('upcoming')}
+            className="tab-button"
             style={{
               padding: '10px 20px',
               border: 'none',
@@ -111,6 +112,7 @@ const ParticipantDashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab('completed')}
+            className="tab-button"
             style={{
               padding: '10px 20px',
               border: 'none',
@@ -125,6 +127,7 @@ const ParticipantDashboard = () => {
           </button>
           <button
             onClick={() => setActiveTab('cancelled')}
+            className="tab-button"
             style={{
               padding: '10px 20px',
               border: 'none',

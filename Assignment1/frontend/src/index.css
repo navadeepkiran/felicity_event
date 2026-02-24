@@ -182,6 +182,8 @@ body {
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px var(--accent-cyan-glow), 0 0 30px var(--accent-cyan-glow);
+  color: #000000;
+  font-weight: 700;
 }
 
 .btn-primary:active {
@@ -197,6 +199,8 @@ body {
 .btn-success:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px var(--accent-green-glow), 0 0 30px var(--accent-green-glow);
+  color: #000000;
+  font-weight: 700;
 }
 
 .btn-danger {
@@ -208,6 +212,8 @@ body {
 .btn-danger:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5), 0 0 30px rgba(239, 68, 68, 0.3);
+  color: #000000;
+  font-weight: 700;
 }
 
 .btn-secondary {
@@ -221,6 +227,169 @@ body {
   transform: translateY(-2px);
   border-color: var(--accent-cyan);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-cyan-glow);
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #eab308 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+.btn-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5), 0 0 30px rgba(245, 158, 11, 0.3);
+  color: #000000;
+  font-weight: 700;
+}
+
+.btn-feedback-gradient {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(88, 166, 255, 0.4);
+  font-weight: 600;
+}
+
+.btn-feedback-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--accent-cyan-glow), 0 0 30px var(--accent-purple-glow);
+  color: #000000;
+  font-weight: 700;
+}
+
+/* Tab buttons with inline styles */
+.tab-button {
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  color: #000000 !important;
+  font-weight: 700 !important;
+}
+
+/* Organizer action buttons with gradients */
+.btn-edit-event {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+}
+
+.btn-edit-event:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5), 0 0 30px rgba(239, 68, 68, 0.3);
+  color: #000000;
+  font-weight: 700;
+}
+
+.btn-discussion {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+  border: none;
+  color: white;
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+}
+
+.btn-discussion:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(168, 85, 247, 0.5), 0 0 30px var(--accent-cyan-glow);
+  color: #000000;
+  font-weight: 700;
+}
+
+.btn-qr-scanner {
+  background: linear-gradient(135deg, var(--accent-cyan), #4facfe);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 15px rgba(88, 166, 255, 0.4);
+}
+
+.btn-qr-scanner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--accent-cyan-glow), 0 0 30px rgba(79, 172, 254, 0.4);
+  color: #000000;
+  font-weight: 700;
+}
+
+.btn-view-feedback {
+  background: linear-gradient(135deg, #ff6b9d, var(--accent-purple));
+  border: none;
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
+}
+
+.btn-view-feedback:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 157, 0.5), 0 0 30px rgba(168, 85, 247, 0.3);
+  color: #000000;
+  font-weight: 700;
+}
+
+.btn-export-csv {
+  background: linear-gradient(135deg, var(--accent-green), #22d3ee);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 15px rgba(63, 185, 80, 0.4);
+}
+
+.btn-export-csv:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--accent-green-glow), 0 0 30px rgba(34, 211, 238, 0.4);
+  color: #000000;
+  font-weight: 700;
+}
+
+/* Copy password button */
+.btn-copy-password {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
+  font-weight: 600;
+}
+
+.btn-copy-password:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(74, 222, 128, 0.5), 0 0 30px rgba(34, 197, 94, 0.4);
+  color: #000000;
+  font-weight: 700;
+}
+
+/* Reaction buttons */
+.btn-reaction {
+  padding: 8px 16px;
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.btn-reaction:hover {
+  transform: translateY(-2px);
+  color: #000000 !important;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3);
+}
+
+/* Pin/Announcement toggle buttons */
+.btn-toggle {
+  font-size: 12px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-default);
+  transition: all 0.3s ease;
+}
+
+.btn-toggle:hover {
+  transform: translateY(-2px);
+  color: #000000 !important;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(88, 166, 255, 0.3);
 }
 
 .btn:disabled {

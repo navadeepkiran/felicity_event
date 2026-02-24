@@ -429,7 +429,7 @@ const EventDiscussions = () => {
                       <>
                         <button
                           onClick={() => handleTogglePin(discussion._id)}
-                          className="btn"
+                          className="btn btn-toggle"
                           style={{ 
                             fontSize: '12px', 
                             padding: '5px 10px',
@@ -442,7 +442,7 @@ const EventDiscussions = () => {
                         </button>
                         <button
                           onClick={() => handleToggleAnnouncement(discussion._id)}
-                          className="btn"
+                          className="btn btn-toggle"
                           style={{ 
                             fontSize: '12px', 
                             padding: '5px 10px',
@@ -479,7 +479,7 @@ const EventDiscussions = () => {
                 }}>
                   <button
                     onClick={() => handleReaction(discussion._id, 'like')}
-                    className="btn"
+                    className="btn btn-reaction"
                     style={{
                       fontSize: '14px',
                       padding: '6px 12px',
@@ -492,7 +492,7 @@ const EventDiscussions = () => {
                   </button>
                   <button
                     onClick={() => handleReaction(discussion._id, 'helpful')}
-                    className="btn"
+                    className="btn btn-reaction"
                     style={{
                       fontSize: '14px',
                       padding: '6px 12px',
@@ -505,7 +505,7 @@ const EventDiscussions = () => {
                   </button>
                   <button
                     onClick={() => handleReaction(discussion._id, 'question')}
-                    className="btn"
+                    className="btn btn-reaction"
                     style={{
                       fontSize: '14px',
                       padding: '6px 12px',

@@ -250,18 +250,11 @@ const ManageClubs = () => {
                   />
                   <button
                     onClick={() => copyToClipboard(createCredentialsData.password, 'Password')}
+                    className="btn btn-copy-password"
                     style={{
                       padding: '10px 15px',
-                      background: 'linear-gradient(135deg, #4ade80, #22c55e)',
-                      border: 'none',
-                      borderRadius: '6px',
-                      color: 'white',
-                      cursor: 'pointer',
-                      fontWeight: '600',
-                      transition: 'all 0.3s'
+                      borderRadius: '6px'
                     }}
-                    onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-                    onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                   >
                     📋 Copy
                   </button>
@@ -436,18 +429,11 @@ const ManageClubs = () => {
                   />
                   <button
                     onClick={() => copyToClipboard(resetPasswordData.password, 'Password')}
+                    className="btn btn-copy-password"
                     style={{
                       padding: '10px 15px',
-                      background: 'linear-gradient(135deg, #4ade80, #22c55e)',
-                      border: 'none',
-                      borderRadius: '6px',
-                      color: 'white',
-                      cursor: 'pointer',
-                      fontWeight: '600',
-                      transition: 'all 0.3s'
+                      borderRadius: '6px'
                     }}
-                    onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-                    onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                   >
                     📋 Copy
                   </button>

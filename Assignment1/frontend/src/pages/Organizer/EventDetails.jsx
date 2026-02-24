@@ -100,12 +100,7 @@ const OrganizerEventDetails = () => {
           <div style={{ display: 'flex', gap: '10px' }}>
             <button 
               onClick={() => navigate(`/organizer/events/${eventId}/edit`)} 
-              className="btn"
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
-                border: 'none',
-                color: 'white'
-              }}
+              className="btn btn-edit-event"
             >
               ✏️ Edit Event
             </button>
@@ -114,45 +109,25 @@ const OrganizerEventDetails = () => {
             )}
             <button 
               onClick={() => navigate(`/events/${eventId}/discussions`)} 
-              className="btn"
-              style={{
-                background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-cyan))',
-                border: 'none',
-                color: 'white'
-              }}
+              className="btn btn-discussion"
             >
               💬 Discussion Forum
             </button>
             <button 
               onClick={() => navigate(`/organizer/events/${eventId}/attendance`)} 
-              className="btn"
-              style={{
-                background: 'linear-gradient(135deg, var(--accent-cyan), #4facfe)',
-                border: 'none',
-                color: 'white'
-              }}
+              className="btn btn-qr-scanner"
             >
               📷 QR Scanner
             </button>
             <button 
               onClick={() => navigate(`/organizer/events/${eventId}/feedback`)} 
-              className="btn"
-              style={{
-                background: 'linear-gradient(135deg, #ff6b9d, var(--accent-purple))',
-                border: 'none',
-                color: 'white'
-              }}
+              className="btn btn-view-feedback"
             >
               📊 View Feedback
             </button>
             <button 
               onClick={handleExport} 
-              className="btn"
-              style={{
-                background: 'linear-gradient(135deg, var(--accent-green), #22d3ee)',
-                border: 'none',
-                color: 'white'
-              }}
+              className="btn btn-export-csv"
             >
               📥 Export CSV
             </button>

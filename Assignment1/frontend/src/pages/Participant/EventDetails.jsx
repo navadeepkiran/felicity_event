@@ -408,14 +408,10 @@ const EventDetails = () => {
               {(new Date(event.eventEndDate) < new Date() || registration?.status === 'attended') && (
                 <button
                   onClick={() => navigate(`/events/${eventId}/feedback`)}
-                  className="btn"
+                  className="btn btn-feedback-gradient"
                   style={{ 
                     marginTop: '20px', 
-                    fontSize: '1.1rem',
-                    background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))',
-                    border: 'none',
-                    color: 'white',
-                    fontWeight: '600'
+                    fontSize: '1.1rem'
                   }}
                 >
                   📝 Submit Feedback

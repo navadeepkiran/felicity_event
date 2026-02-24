@@ -40,6 +40,16 @@ const OrganizerProfile = () => {
     }
   };
 
+  const handleTestWebhook = async () => {
+    try {
+      toast.info('Sending test message to Discord...');
+      const response = await api.post('/organizer/test-webhook');
+      toast.success(response.data.message);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to test webhook');
+    }
+  };
+
   if (loading) return <Layout><div className="loading">Loading...</div></Layout>;
 
   return (
@@ -88,9 +98,24 @@ const OrganizerProfile = () => {
             </div>
             <div className="form-group">
               <label className="form-label">Discord Webhook (Optional)</label>
-              <input className="form-input" value={formData.discordWebhook || ''}
-                onChange={(e) => setFormData({...formData, discordWebhook: e.target.value})}
-                disabled={!editing} placeholder="https://discord.com/api/webhooks/..." />
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <input className="form-input" value={formData.discordWebhook || ''}
+                  onChange={(e) => setFormData({...formData, discordWebhook: e.target.value})}
+                  disabled={!editing} placeholder="https://discord.com/api/webhooks/..." 
+                  style={{ flex: 1 }} />
+                {!editing && profile?.discordWebhook && (
+                  <button 
+                    type="button"
+                    onClick={handleTestWebhook}
+                    className="btn btn-secondary"
+                    style={{ whiteSpace: 'nowrap' }}>
+                    Test Webhook
+                  </button>
+                )}
+              </div>
+              <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '5px' }}>
+                Discord will receive automatic notifications when you publish new events
+              </small>
             </div>
             {editing && (
               <button type="submit" className="btn btn-primary">Save Changes</button>

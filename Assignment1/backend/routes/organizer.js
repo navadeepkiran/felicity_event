@@ -1,4 +1,5 @@
 import express from 'express';
+import axios from 'axios';
 import { authenticate, isOrganizer } from '../middleware/auth.js';
 import Event from '../models/Event.js';
 import Registration from '../models/Registration.js';
@@ -6,6 +7,78 @@ import User from '../models/User.js';
 import PasswordResetRequest from '../models/PasswordResetRequest.js';
 
 const router = express.Router();
+
+// Helper function to post event to Discord webhook
+const postToDiscord = async (webhookUrl, event, organizer) => {
+  try {
+    console.log('🔔 Discord Webhook: Attempting to post event:', event.eventName);
+    console.log('🔗 Webhook URL:', webhookUrl);
+    
+    const embed = {
+      title: event.eventName,
+      description: event.eventDescription,
+      color: 5814783, // Blue color
+      fields: [
+        {
+          name: 'Organizer',
+          value: organizer.organizerName,
+          inline: true
+        },
+        {
+          name: 'Event Type',
+          value: event.eventType.charAt(0).toUpperCase() + event.eventType.slice(1),
+          inline: true
+        },
+        {
+          name: 'Start Date',
+          value: new Date(event.eventStartDate).toLocaleDateString('en-IN'),
+          inline: true
+        },
+        {
+          name: 'End Date',
+          value: new Date(event.eventEndDate).toLocaleDateString('en-IN'),
+          inline: true
+        },
+        {
+          name: 'Registration Deadline',
+          value: new Date(event.registrationDeadline).toLocaleDateString('en-IN'),
+          inline: true
+        },
+        {
+          name: 'Registration Fee',
+          value: event.registrationFee ? `₹${event.registrationFee}` : 'Free',
+          inline: true
+        },
+        {
+          name: 'Registration Limit',
+          value: event.registrationLimit ? event.registrationLimit.toString() : 'Unlimited',
+          inline: true
+        },
+        {
+          name: 'Eligibility',
+          value: event.eligibility || 'All students',
+          inline: true
+        }
+      ],
+      timestamp: new Date().toISOString()
+    };
+
+    const response = await axios.post(webhookUrl, {
+      content: '📢 **New Event Published!**',
+      embeds: [embed]
+    });
+
+    console.log('✅ Discord Webhook: Successfully posted to Discord (Status:', response.status, ')');
+    return true;
+  } catch (error) {
+    console.error('❌ Discord Webhook Error:', error.message);
+    if (error.response) {
+      console.error('❌ Discord API Response:', error.response.status, error.response.data);
+    }
+    // Don't throw error - webhook posting is a secondary feature
+    return false;
+  }
+};
 
 // All routes require authentication and organizer role
 router.use(authenticate, isOrganizer);
@@ -209,9 +282,16 @@ router.post('/events/:eventId/publish', async (req, res) => {
     event.status = 'published';
     await event.save();
 
-    // TODO: Post to Discord webhook if configured
+    // Post to Discord webhook if configured
+    console.log('📋 Checking Discord webhook for organizer:', req.user.organizerName);
+    console.log('📋 Discord webhook URL:', req.user.discordWebhook || 'NOT CONFIGURED');
+    
     if (req.user.discordWebhook) {
-      // Implement Discord webhook posting
+      console.log('📤 Posting to Discord webhook...');
+      const webhookSuccess = await postToDiscord(req.user.discordWebhook, event, req.user);
+      console.log('📤 Webhook result:', webhookSuccess ? 'SUCCESS' : 'FAILED');
+    } else {
+      console.log('⚠️ No Discord webhook configured for this organizer');
     }
 
     res.json({
@@ -351,6 +431,58 @@ router.put('/profile', async (req, res) => {
       success: false, 
       message: 'Failed to update profile',
       error: error.message 
+    });
+  }
+});
+
+// Test Discord webhook
+router.post('/test-webhook', async (req, res) => {
+  try {
+    // Fetch the latest user data to get the webhook URL
+    const organizer = await User.findById(req.user._id);
+    
+    if (!organizer.discordWebhook) {
+      return res.status(400).json({
+        success: false,
+        message: 'No Discord webhook configured. Please add one in your profile.'
+      });
+    }
+
+    console.log('🧪 Testing Discord webhook for:', organizer.organizerName);
+    console.log('🔗 Webhook URL:', organizer.discordWebhook);
+
+    // Create a test event object
+    const testEvent = {
+      eventName: '🧪 Test Event - Webhook Verification',
+      eventDescription: 'This is a test message to verify your Discord webhook is working correctly.',
+      eventType: 'workshop',
+      eventStartDate: new Date(),
+      eventEndDate: new Date(),
+      registrationDeadline: new Date(),
+      registrationFee: 0,
+      registrationLimit: null,
+      eligibility: 'All students'
+    };
+
+    const success = await postToDiscord(organizer.discordWebhook, testEvent, organizer);
+
+    if (success) {
+      res.json({
+        success: true,
+        message: 'Test message sent to Discord successfully! Check your Discord channel.'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to send test message. Check console logs for details.'
+      });
+    }
+  } catch (error) {
+    console.error('❌ Test webhook error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to test webhook',
+      error: error.message
     });
   }
 });

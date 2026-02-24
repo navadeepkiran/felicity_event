@@ -23,6 +23,7 @@ import SubmitFeedback from './pages/Participant/SubmitFeedback';
 // Organizer pages
 import OrganizerDashboard from './pages/Organizer/Dashboard';
 import CreateEvent from './pages/Organizer/CreateEvent';
+import EditEvent from './pages/Organizer/EditEvent';
 import OrganizerEventDetails from './pages/Organizer/EventDetails';
 import AttendanceScanner from './pages/Organizer/AttendanceScanner';
 import PasswordResetRequest from './pages/Organizer/PasswordResetRequest';
@@ -178,6 +179,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['organizer']}>
             <OrganizerEventDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/organizer/events/:eventId/edit"
+        element={
+          <ProtectedRoute allowedRoles={['organizer']}>
+            <EditEvent />
           </ProtectedRoute>
         }
       />

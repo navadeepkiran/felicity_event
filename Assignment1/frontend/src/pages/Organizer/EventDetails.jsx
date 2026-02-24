@@ -98,6 +98,17 @@ const OrganizerEventDetails = () => {
             </span>
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              onClick={() => navigate(`/organizer/events/${eventId}/edit`)} 
+              className="btn"
+              style={{
+                background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+                border: 'none',
+                color: 'white'
+              }}
+            >
+              ✏️ Edit Event
+            </button>
             {data.event.status === 'draft' && (
               <button onClick={handlePublish} className="btn btn-success">Publish</button>
             )}
@@ -105,7 +116,7 @@ const OrganizerEventDetails = () => {
               onClick={() => navigate(`/events/${eventId}/discussions`)} 
               className="btn"
               style={{
-                background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-pink))',
+                background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-cyan))',
                 border: 'none',
                 color: 'white'
               }}
@@ -114,7 +125,12 @@ const OrganizerEventDetails = () => {
             </button>
             <button 
               onClick={() => navigate(`/organizer/events/${eventId}/attendance`)} 
-              className="btn btn-primary"
+              className="btn"
+              style={{
+                background: 'linear-gradient(135deg, var(--accent-cyan), #4facfe)',
+                border: 'none',
+                color: 'white'
+              }}
             >
               📷 QR Scanner
             </button>
@@ -122,24 +138,23 @@ const OrganizerEventDetails = () => {
               onClick={() => navigate(`/organizer/events/${eventId}/feedback`)} 
               className="btn"
               style={{
-                background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-purple))',
+                background: 'linear-gradient(135deg, #ff6b9d, var(--accent-purple))',
                 border: 'none',
                 color: 'white'
               }}
             >
               📊 View Feedback
             </button>
-            <button onClick={handleExport} className="btn btn-secondary">Export CSV</button>
             <button 
-              onClick={() => navigate(`/organizer/events/${eventId}/feedback`)} 
+              onClick={handleExport} 
               className="btn"
               style={{
-                background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-cyan))',
-                color: 'white',
-                border: 'none'
+                background: 'linear-gradient(135deg, var(--accent-green), #22d3ee)',
+                border: 'none',
+                color: 'white'
               }}
             >
-              📊 View Feedback
+              📥 Export CSV
             </button>
           </div>
         </div>
